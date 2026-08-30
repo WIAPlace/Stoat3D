@@ -1,5 +1,5 @@
 using UnityEngine;
-
+/*
 namespace HSM {
     public class Grounded : State {
         readonly PlayerContext ctx;
@@ -18,14 +18,19 @@ namespace HSM {
         protected override State GetInitialState() => Idle;
 
         protected override State GetTransition() {
-            if (ctx.jumpPressed) { // Jump
+            if (ctx.jumpPressed) {
                 ctx.jumpPressed = false;
-                
+                var rb = ctx.rb;
 
-
+                if (rb != null) {
+                    var v = rb.linearVelocity;
+                    v.y = ctx.jumpSpeed;
+                    rb.linearVelocity = v;
+                }
                 return ((PlayerRoot)Parent).Airborne;
             }
             return ctx.grounded ? null : ((PlayerRoot)Parent).Airborne;
         }
     }
 }
+*/

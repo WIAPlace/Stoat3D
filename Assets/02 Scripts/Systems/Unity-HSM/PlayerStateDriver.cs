@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 //using UnityUtils;
@@ -7,23 +8,29 @@ using UnityEngine.InputSystem;
 namespace HSM {
     public class PlayerStateDriver : MonoBehaviour {
         public PlayerContext ctx = new PlayerContext();
+        public InputReader input;
+        public GameObject body;
         public Transform groundCheck;
         public float groundRadius = 0.2f;
         public LayerMask groundMask;
         public bool drawGizmos = true;
         string lastPath;
 
-        Rigidbody rb;
+        CharacterController controller;
         StateMachine machine;
         State root;
 
         void Awake() {
             //rb = gameObject.GetOrAdd<Rigidbody>();
-            rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+            //rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+            //ctx.rb = rb;
 
-            ctx.rb = rb;
-            ctx.anim = GetComponentInChildren<Animator>();
-            ctx.renderer = GetComponent<Renderer>();
+            ctx.body=body;
+            controller = body.GetOrAddComponent<CharacterController>();
+            ctx.control = controller;
+            
+            //ctx.anim = GetComponentInChildren<Animator>();
+            //ctx.renderer = GetComponent<Renderer>();
 
             root = new PlayerRoot(null, ctx);
             var builder = new StateMachineBuilder(root);
@@ -31,7 +38,7 @@ namespace HSM {
 
             // fallback: create a groundCheck just below the collider's bounds
             if (groundCheck == null) {
-                var col = GetComponent<Collider>();
+                var col = body.GetComponent<Collider>();
                 var t = new GameObject("groundCheck").transform;
                 t.SetParent(transform, false);
                 var y = col ? (-col.bounds.extents.y + 0.01f) : -0.5f;
@@ -41,11 +48,11 @@ namespace HSM {
         }
 
         void Update() {
-            float x = 0f;
-            if (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed) x -= 1f;
-            if (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed) x += 1f;
-            ctx.jumpPressed = Keyboard.current.spaceKey.wasPressedThisFrame;
-            ctx.move.x = Mathf.Clamp(x, -1f, 1f);
+            //float x = 0f;
+            //if (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed) x -= 1f;
+            //if (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed) x += 1f;
+            //ctx.jumpPressed = Keyboard.current.spaceKey.wasPressedThisFrame;
+            //ctx.move.x = Mathf.Clamp(x, -1f, 1f);
 
             ctx.grounded = Physics.CheckSphere(groundCheck.position, groundRadius, groundMask);
 
@@ -57,14 +64,6 @@ namespace HSM {
                 //Logwin.Log("State", path);
                 lastPath = path;
             }
-        }
-
-        void FixedUpdate() {
-            var v = rb.linearVelocity;
-            v.x = ctx.velocity.x;
-            rb.linearVelocity = v;
-
-            ctx.velocity.x = rb.linearVelocity.x;
         }
 
         void OnDrawGizmosSelected() {
@@ -88,8 +87,10 @@ namespace HSM {
         public float accel = 40f;
         public float jumpSpeed = 7f;
         public bool jumpPressed;
+        public GameObject body;
         public Animator anim;
-        public Rigidbody rb;
+        //public Rigidbody rb;
+        public CharacterController control;
         public Renderer renderer;
     }
 }
