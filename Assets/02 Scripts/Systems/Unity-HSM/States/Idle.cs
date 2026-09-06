@@ -9,11 +9,12 @@ namespace HSM {
         }
 
         protected override State GetTransition() {
-            return Mathf.Abs(ctx.move.x) > 0.01f ? ((Grounded)Parent).Move : null;
+            return Mathf.Abs(ctx.move.magnitude) > 0.01f ? ((Grounded)Parent).Move : null;
         }
 
         protected override void OnEnter() {
             ctx.velocity.x = 0f;
+            ctx.velocity.z = 0f;
         }
     }
 }

@@ -3,6 +3,8 @@ using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Unity.Cinemachine;
+using System.Collections;
 //using UnityUtils;
 
 namespace HSM {
@@ -16,18 +18,25 @@ namespace HSM {
         public bool drawGizmos = true;
         string lastPath;
 
+        CinemachineOrbitalFollow orb;
+
         CharacterController controller;
         StateMachine machine;
         State root;
 
+        // Awake //////////////////////////////////////////////////////////////////////////////////////////////////////////
         void Awake() {
             //rb = gameObject.GetOrAdd<Rigidbody>();
             //rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
             //ctx.rb = rb;
+            Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Locked;
+            
+            
 
             ctx.body=body;
             controller = body.GetOrAddComponent<CharacterController>();
-            ctx.control = controller;
+            ctx.controller = controller;
             
             //ctx.anim = GetComponentInChildren<Animator>();
             //ctx.renderer = GetComponent<Renderer>();
@@ -35,6 +44,10 @@ namespace HSM {
             root = new PlayerRoot(null, ctx);
             var builder = new StateMachineBuilder(root);
             machine = builder.Build();
+
+            // Set Up Events
+            input.MoveEvent += HandleMove;
+
 
             // fallback: create a groundCheck just below the collider's bounds
             if (groundCheck == null) {
@@ -45,27 +58,48 @@ namespace HSM {
                 t.localPosition = new Vector3(0, y, 0);
                 groundCheck = t;
             }
+
+            //ctx.cinCam.ForceCameraPosition()
+        }
+        void Start()
+        {
+            orb = ctx.cinCam.GetComponent<CinemachineOrbitalFollow>();    
+            orb.HorizontalAxis.Recentering.Enabled = true;
+            StartCoroutine(DisableRecentering());
         }
 
+        // Destroy //////////////////////////////////////////////////////////////////////////////////////////////////////////
+        void OnDestroy()
+        {
+            input.MoveEvent -= HandleMove;
+        }
+
+        // Update //////////////////////////////////////////////////////////////////////////////////////////////////////////
         void Update() {
-            //float x = 0f;
-            //if (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed) x -= 1f;
-            //if (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed) x += 1f;
-            //ctx.jumpPressed = Keyboard.current.spaceKey.wasPressedThisFrame;
-            //ctx.move.x = Mathf.Clamp(x, -1f, 1f);
 
             ctx.grounded = Physics.CheckSphere(groundCheck.position, groundRadius, groundMask);
 
             machine.Tick(Time.deltaTime);
 
-            var path = StatePath(machine.Root.Leaf());
+            ctx.currentLeaf = machine.Root.Leaf();
+            var path = StatePath(ctx.currentLeaf);
+            ctx.debugCurrentLeaf = path;
 
             if (path != lastPath) {
-                //Logwin.Log("State", path);
+                //Debug.Log("State"+ path);
                 lastPath = path;
             }
-        }
 
+            float gravVel = ctx.velocity.y; // maintain gravity
+            // Move in the direction of the controller.
+            Vector3 horizontalVel = (controller.transform.right * ctx.velocity.x) + (controller.transform.forward * ctx.velocity.z);
+
+            ctx.velocity = new Vector3(horizontalVel.x,gravVel,horizontalVel.z);
+
+            controller.Move(ctx.velocity * Time.deltaTime);
+        }   
+
+        // Misc /////////////////////////////////////////////////////////////////////////////////////////////////////////////
         void OnDrawGizmosSelected() {
             if (!drawGizmos || groundCheck == null) return;
 
@@ -76,8 +110,23 @@ namespace HSM {
         static string StatePath(State s) {
             return string.Join(" > ", s.PathToRoot().Reverse().Select(n => n.GetType().Name));
         }
+
+        // Handle Events //////////////////////////////////////////////////////////////////////////////////////////////////////
+        private void HandleMove(Vector2 moveInput) // Move
+        {
+            ctx.move.x = moveInput.x;
+            ctx.move.z = moveInput.y;
+
+            ctx.move.Normalize();
+        }
+        IEnumerator DisableRecentering()
+        {
+            yield return new WaitForSeconds(1f);
+            orb.HorizontalAxis.Recentering.Enabled = false;
+        }
     }
 
+    // Player Context //////////////////////////////////////////////////////////////////////////////////////////////////////////
     [Serializable]
     public class PlayerContext {
         public Vector3 move;
@@ -87,10 +136,20 @@ namespace HSM {
         public float accel = 40f;
         public float jumpSpeed = 7f;
         public bool jumpPressed;
+        public float gravForce = 9.81f;
+        //public float gravMulti = 2.0f;
+
+        [Header("Refrences")]
         public GameObject body;
+        public CharacterController controller;
+        public CinemachineCamera cinCam;
+        public Transform cinCamTransform => cinCam.transform;
         public Animator anim;
         //public Rigidbody rb;
-        public CharacterController control;
         public Renderer renderer;
+        
+        [Header("Debug")]
+        public State currentLeaf;
+        public string debugCurrentLeaf;
     }
 }

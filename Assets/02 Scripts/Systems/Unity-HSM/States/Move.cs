@@ -11,12 +11,16 @@ namespace HSM {
         protected override State GetTransition() {
             if (!ctx.grounded) return ((PlayerRoot)Parent).Airborne;
             
-            return Mathf.Abs(ctx.move.x) <= 0.01f ? ((Grounded)Parent).Idle : null;
+            return Mathf.Abs(ctx.move.magnitude) <= 0.01f ? ((Grounded)Parent).Idle : null;
         }
 
-        protected override void OnUpdate(float deltaTime) {
-            var target = ctx.move.x * ctx.moveSpeed;
-            ctx.velocity.x = Mathf.MoveTowards(ctx.velocity.x, target, ctx.accel * deltaTime);
+        protected override void OnUpdate(float deltaTime)
+        {
+            //Debug.Log("Walk");
+            float targetx = ctx.move.x * ctx.moveSpeed;
+            float targetz = ctx.move.z * ctx.moveSpeed;
+            ctx.velocity.x = targetx;
+            ctx.velocity.z = targetz;
         }
     }
 }
