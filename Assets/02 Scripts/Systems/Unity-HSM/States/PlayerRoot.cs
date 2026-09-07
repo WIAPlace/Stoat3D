@@ -14,7 +14,7 @@ namespace HSM {
         
         protected override State GetInitialState() => Grounded;
         //protected override State GetTransition() => ctx.grounded ? null : Airborne;
-        
+        /*
         protected override State GetTransition()
         {
             if(!ctx.grounded && ctx.currentLeaf != Airborne.Leaf())
@@ -27,5 +27,6 @@ namespace HSM {
             }
             else return null;
         }
+        */
     }
 }

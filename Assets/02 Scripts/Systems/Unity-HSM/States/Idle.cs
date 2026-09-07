@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace HSM {
@@ -13,8 +14,33 @@ namespace HSM {
         }
 
         protected override void OnEnter() {
-            ctx.velocity.x = 0f;
-            ctx.velocity.z = 0f;
+            //ctx.velocity.x = 0;
+            //ctx.velocity.z = 0;
+        }
+
+        protected override void OnUpdate(float deltaTime)
+        {
+            if(ctx.velocity.magnitude > 0.1f)
+            {
+                //Debug.Log("Decelling: " + ctx.velocity);
+                float currentX = Mathf.MoveTowards(ctx.velocity.x,0,ctx.decel * deltaTime);
+                float currentZ = Mathf.MoveTowards(ctx.velocity.z,0,ctx.decel * deltaTime);
+
+                ctx.velocity.x = currentX;
+                ctx.velocity.z = currentZ;
+                if(Mathf.Abs(ctx.velocity.x) < .01f)
+                {
+                    ctx.velocity.x = 0;
+                }
+                if(Mathf.Abs(ctx.velocity.z) < .01f)
+                {
+                    ctx.velocity.z = 0;
+                }
+            }
+            else if(ctx.velocity.magnitude != 0 &&ctx.velocity.magnitude < 0.1f)
+            {
+                ctx.velocity = Vector3.zero;
+            }
         }
     }
 }

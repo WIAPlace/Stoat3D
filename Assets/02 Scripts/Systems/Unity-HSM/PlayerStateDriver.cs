@@ -48,8 +48,8 @@ namespace HSM {
             var builder = new StateMachineBuilder(root);
             machine = builder.Build();
 
-            // Set Up Events
-            input.MoveEvent += HandleMove;
+            // Set Up Events 
+            SetUpEvents();
 
 
             // fallback: create a groundCheck just below the collider's bounds
@@ -74,7 +74,7 @@ namespace HSM {
         // Destroy //////////////////////////////////////////////////////////////////////////////////////////////////////////
         void OnDestroy()
         {
-            input.MoveEvent -= HandleMove;
+            EndEvents();
         }
 
         // Update //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -95,11 +95,11 @@ namespace HSM {
 
             float gravVel = ctx.velocity.y; // maintain gravity
             // Move in the direction of the controller.
-            Vector3 horizontalVel = (cam.transform.right * ctx.velocity.x) + (cam.transform.forward * ctx.velocity.z);
+            Vector3 horizontalVel = (body.transform.right * ctx.velocity.x) + (body.transform.forward * ctx.velocity.z);
 
-            ctx.velocity = new Vector3(horizontalVel.x,gravVel,horizontalVel.z);
+            Vector3 tempVel = new Vector3(horizontalVel.x,gravVel,horizontalVel.z);
 
-            controller.Move(ctx.velocity * Time.deltaTime);
+            controller.Move(tempVel * Time.deltaTime);
         }   
 
         // Misc /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -114,6 +114,28 @@ namespace HSM {
             return string.Join(" > ", s.PathToRoot().Reverse().Select(n => n.GetType().Name));
         }
 
+        // Weird start up stuff ////////////////////////////////////////////////////////////////////////////////////////////////
+        IEnumerator DisableRecentering()
+        {
+            yield return new WaitForSeconds(1f);
+            orb.HorizontalAxis.Recentering.Enabled = false;
+        }
+
+
+        // Events /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        private void SetUpEvents()
+        {
+            input.MoveEvent += HandleMove;
+            input.JumpEvent += HandleJump;
+            input.JumpCancelledEvent += HandleJumpCancelled;
+        }
+        private void EndEvents()
+        {
+            input.MoveEvent -= HandleMove;
+            input.JumpEvent -= HandleJump;
+            input.JumpCancelledEvent -= HandleJumpCancelled;
+        }
+        
         // Handle Events //////////////////////////////////////////////////////////////////////////////////////////////////////
         private void HandleMove(Vector2 moveInput) // Move
         {
@@ -122,11 +144,20 @@ namespace HSM {
 
             ctx.move.Normalize();
         }
-        IEnumerator DisableRecentering()
+
+        private void HandleJump()
         {
-            yield return new WaitForSeconds(1f);
-            orb.HorizontalAxis.Recentering.Enabled = false;
+            if(!ctx.jumpPressed){
+                ctx.jumpPressed = true;
+            }
         }
+        private void HandleJumpCancelled()
+        {
+            if(ctx.jumpPressed){
+                ctx.jumpPressed = false;
+            }
+        }
+        
     }
 
     // Player Context //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -138,9 +169,11 @@ namespace HSM {
         public bool grounded;
         public float moveSpeed = 6f;
         public float accel = 40f;
-        public float jumpSpeed = 7f;
+        public float decel = 50f;
+        public float jumpForce = 7f;
         public bool jumpPressed;
         public float gravForce = 9.81f;
+        public float drag = 1;
 
         [Header("Visual Variables")]
         [Tooltip("Speed the visual gameobject turns")]public float turnSpeed = 5;

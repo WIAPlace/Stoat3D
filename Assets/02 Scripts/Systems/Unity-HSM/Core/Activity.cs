@@ -20,7 +20,7 @@ namespace HSM {
             Mode = ActivityMode.Activating;
             await Task.CompletedTask;
             Mode = ActivityMode.Active;
-            Debug.Log($"Activated {GetType().Name} (mode={Mode})");
+            //Debug.Log($"Activated {GetType().Name} (mode={Mode})");
         }
 
         public virtual async Task DeactivateAsync(CancellationToken ct) {
@@ -29,7 +29,7 @@ namespace HSM {
             Mode = ActivityMode.Deactivating;
             await Task.CompletedTask;
             Mode = ActivityMode.Inactive;
-            Debug.Log($"Deactivated {GetType().Name} (mode={Mode})");
+            //Debug.Log($"Deactivated {GetType().Name} (mode={Mode})");
         }
     }
 }

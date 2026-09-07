@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using UnityEngine;
 
 namespace HSM {
@@ -9,7 +10,10 @@ namespace HSM {
         }
 
         protected override State GetTransition() {
-            if (!ctx.grounded) return ((PlayerRoot)Parent).Airborne;
+            
+            if (!ctx.grounded) {
+                return ((PlayerRoot)Parent).Airborne;
+            }
             
             return Mathf.Abs(ctx.move.magnitude) <= 0.01f ? ((Grounded)Parent).Idle : null;
         }
@@ -19,8 +23,14 @@ namespace HSM {
             //Debug.Log("Walk");
             float targetx = ctx.move.x * ctx.moveSpeed;
             float targetz = ctx.move.z * ctx.moveSpeed;
+
+            targetx = Mathf.MoveTowards(ctx.velocity.x, targetx, ctx.accel*deltaTime);
+            targetz = Mathf.MoveTowards(ctx.velocity.z, targetz, ctx.accel*deltaTime);
+
+
             ctx.velocity.x = targetx;
             ctx.velocity.z = targetz;
+
 
             // turn visual player to forward
             ctx.TurnToForward(deltaTime);

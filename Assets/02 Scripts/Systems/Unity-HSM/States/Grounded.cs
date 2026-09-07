@@ -19,9 +19,9 @@ namespace HSM {
 
         protected override State GetTransition() {
             if (ctx.jumpPressed) { // Jump
+                //ctx.jumpPressed = false;
+                ctx.velocity.y = ctx.jumpForce;
                 ctx.jumpPressed = false;
-                
-
 
                 return ((PlayerRoot)Parent).Airborne;
             }
