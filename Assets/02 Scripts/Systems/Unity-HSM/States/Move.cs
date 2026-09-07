@@ -21,6 +21,9 @@ namespace HSM {
             float targetz = ctx.move.z * ctx.moveSpeed;
             ctx.velocity.x = targetx;
             ctx.velocity.z = targetz;
+
+            // turn visual player to forward
+            ctx.TurnToForward(deltaTime);
         }
     }
 }

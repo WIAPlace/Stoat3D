@@ -21,6 +21,7 @@ namespace HSM {
         CinemachineOrbitalFollow orb;
 
         CharacterController controller;
+        Transform cam;
         StateMachine machine;
         State root;
 
@@ -37,6 +38,8 @@ namespace HSM {
             ctx.body=body;
             controller = body.GetOrAddComponent<CharacterController>();
             ctx.controller = controller;
+
+            cam = ctx.cinCamTransform;
             
             //ctx.anim = GetComponentInChildren<Animator>();
             //ctx.renderer = GetComponent<Renderer>();
@@ -92,7 +95,7 @@ namespace HSM {
 
             float gravVel = ctx.velocity.y; // maintain gravity
             // Move in the direction of the controller.
-            Vector3 horizontalVel = (controller.transform.right * ctx.velocity.x) + (controller.transform.forward * ctx.velocity.z);
+            Vector3 horizontalVel = (cam.transform.right * ctx.velocity.x) + (cam.transform.forward * ctx.velocity.z);
 
             ctx.velocity = new Vector3(horizontalVel.x,gravVel,horizontalVel.z);
 
@@ -129,6 +132,7 @@ namespace HSM {
     // Player Context //////////////////////////////////////////////////////////////////////////////////////////////////////////
     [Serializable]
     public class PlayerContext {
+        [Header("Game Variables")]
         public Vector3 move;
         public Vector3 velocity;
         public bool grounded;
@@ -137,7 +141,9 @@ namespace HSM {
         public float jumpSpeed = 7f;
         public bool jumpPressed;
         public float gravForce = 9.81f;
-        //public float gravMulti = 2.0f;
+
+        [Header("Visual Variables")]
+        [Tooltip("Speed the visual gameobject turns")]public float turnSpeed = 5;
 
         [Header("Refrences")]
         public GameObject body;
@@ -151,5 +157,17 @@ namespace HSM {
         [Header("Debug")]
         public State currentLeaf;
         public string debugCurrentLeaf;
+
+        public void TurnToForward(float tickTime)
+        {
+            // Get the forward direction of the target transform
+            Vector3 targetDir = new Vector3(cinCamTransform.forward.x,0,cinCamTransform.forward.z);
+            
+            // Create the target rotation looking in that direction
+            Quaternion targetRotation = Quaternion.LookRotation(targetDir);
+            
+            // Smoothly rotate toward the target rotation
+            body.transform.rotation = Quaternion.Slerp(body.transform.rotation, targetRotation, turnSpeed * tickTime);
+        }
     }
 }

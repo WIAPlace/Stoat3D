@@ -26,10 +26,9 @@ namespace HSM {
             //Debug.Log("grav");
             ctx.velocity.y += -ctx.gravForce * deltaTime; // apply gravity
 
-            // Match the player body's Y rotation to the camera target's Y rotation
-            // Maybe change this to be changing a value rather than changing it directly in the state itself.
-            //Vector3 targetRotation = new Vector3(0, ctx.cinCamTransform.eulerAngles.y, 0);
-            //ctx.controller.transform.rotation = Quaternion.Euler(targetRotation);
+            // turn visual player to dir of cam.
+            // will probably be taken off of this parent state, and only put on sertain child states.
+            ctx.TurnToForward(deltaTime);
         }
     }
 }
