@@ -21,7 +21,6 @@ namespace HSM {
         CinemachineOrbitalFollow orb;
 
         CharacterController controller;
-        Transform cam;
         StateMachine machine;
         State root;
 
@@ -38,8 +37,6 @@ namespace HSM {
             ctx.body=body;
             controller = body.GetOrAddComponent<CharacterController>();
             ctx.controller = controller;
-
-            cam = ctx.cinCamTransform;
             
             //ctx.anim = GetComponentInChildren<Animator>();
             //ctx.renderer = GetComponent<Renderer>();
@@ -128,12 +125,20 @@ namespace HSM {
             input.MoveEvent += HandleMove;
             input.JumpEvent += HandleJump;
             input.JumpCancelledEvent += HandleJumpCancelled;
+            input.SprintEvent += SprintEvent;
+            input.SprintCancelledEvent += SprintEventCancelled;
+            input.CrouchEvent += CrouchEvent;
+            input.CrouchCancelledEvent += CrouchEventCancelled;
         }
         private void EndEvents()
         {
             input.MoveEvent -= HandleMove;
             input.JumpEvent -= HandleJump;
             input.JumpCancelledEvent -= HandleJumpCancelled;
+            input.SprintEvent -= SprintEvent;
+            input.SprintCancelledEvent -= SprintEventCancelled;
+            input.CrouchEvent -= CrouchEvent;
+            input.CrouchCancelledEvent -= CrouchEventCancelled;
         }
         
         // Handle Events //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -158,6 +163,36 @@ namespace HSM {
             }
         }
         
+        private void SprintEvent()
+        {
+            if (!ctx.sprinting)
+            {
+                ctx.sprinting = true;
+            }
+        }
+        private void SprintEventCancelled()
+        {
+            if (ctx.sprinting)
+            {
+                ctx.sprinting = false;
+            }
+        }
+
+        private void CrouchEvent()
+        {
+            if (!ctx.crouching)
+            {
+                ctx.crouching = true;
+            }
+        }
+        private void CrouchEventCancelled()
+        {
+            if (ctx.crouching)
+            {
+                ctx.crouching = false;
+            }
+        }
+        
     }
 
     // Player Context //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -166,20 +201,36 @@ namespace HSM {
         [Header("Game Variables")]
         public Vector3 move;
         public Vector3 velocity;
-        public bool grounded;
+
         public float moveSpeed = 6f;
+        public float currentMoveSpeed = 0f;
+
         public float accel = 40f;
         public float decel = 50f;
+        public float slideDecel = 10f;
+
         public float jumpForce = 7f;
-        public bool jumpPressed;
+        
         public float gravForce = 9.81f;
         public float drag = 1;
+
+        [Header("State Modifiers")]
+        public float sprintMod = 2;
+        public float crouchMod = .5f;
+
+        // Bools
+        [Header("Bools")]
+        public bool jumpPressed;
+        public bool grounded;
+        public bool sprinting;
+        public bool crouching;
 
         [Header("Visual Variables")]
         [Tooltip("Speed the visual gameobject turns")]public float turnSpeed = 5;
 
         [Header("Refrences")]
         public GameObject body;
+        public GameObject visualBody;
         public CharacterController controller;
         public CinemachineCamera cinCam;
         public Transform cinCamTransform => cinCam.transform;
@@ -193,6 +244,7 @@ namespace HSM {
 
         public void TurnToForward(float tickTime)
         {
+            /////////////////////////// Real Body
             // Get the forward direction of the target transform
             Vector3 targetDir = new Vector3(cinCamTransform.forward.x,0,cinCamTransform.forward.z);
             
@@ -201,6 +253,18 @@ namespace HSM {
             
             // Smoothly rotate toward the target rotation
             body.transform.rotation = Quaternion.Slerp(body.transform.rotation, targetRotation, turnSpeed * tickTime);
+
+            ///////////////////////// Visual
+            /// get the movment direction from the normals of the players velocity
+            Vector3 targetVisualDir = velocity.normalized;
+            targetVisualDir = (cinCamTransform.forward * targetVisualDir.z) + (cinCamTransform.right * targetVisualDir.x);
+            targetVisualDir.y = 0;
+
+            // Create the target rotation looking in that direction
+            Quaternion targetVisualRot = Quaternion.LookRotation(targetVisualDir);
+
+            // Smoothly rotate toward the target rotation
+            visualBody.transform.rotation = Quaternion.Slerp(visualBody.transform.rotation, targetVisualRot, turnSpeed * tickTime);
         }
     }
 }

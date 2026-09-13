@@ -22,7 +22,7 @@ namespace HSM {
         protected override State GetTransition() => ctx.grounded ? ((PlayerRoot)Parent).Grounded : null;
 
         protected override void OnEnter() {
-            Debug.Log(ctx.velocity);
+            //Debug.Log(ctx.velocity);
         }
         protected override void OnUpdate(float deltaTime)
         {
@@ -38,19 +38,14 @@ namespace HSM {
             ctx.velocity.x /= 1f + ctx.drag * deltaTime;
             ctx.velocity.z /= 1f + ctx.drag * deltaTime;
 
-            if(ctx.velocity.x < .1f)
+            if(Mathf.Abs(ctx.velocity.x) < .01f)
             {
                 ctx.velocity.x = 0;
             }
-            if(ctx.velocity.z < .1f)
+            if(Mathf.Abs(ctx.velocity.z) < .01f )
             {
                 ctx.velocity.z = 0;
             }
-            
-
-            // turn visual player to dir of cam.
-            // will probably be taken off of this parent state, and only put on sertain child states.
-            ctx.TurnToForward(deltaTime);
         }
     }
 }

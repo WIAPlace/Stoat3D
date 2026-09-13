@@ -17,6 +17,7 @@ namespace HSM {
         
         protected override State GetInitialState() => Idle;
 
+        // Get Transition Occurs from top of the states to the bottom
         protected override State GetTransition() {
             if (ctx.jumpPressed) { // Jump
                 //ctx.jumpPressed = false;
@@ -32,6 +33,7 @@ namespace HSM {
             //Debug.Log("Entered Grounded");
         }
 
+        // On Update Occurs from the bottom of the tree to the top
         protected override void OnUpdate(float deltaTime)
         {
             if(ctx.grounded && ctx.velocity.y < 0) // if on ground reset gravity

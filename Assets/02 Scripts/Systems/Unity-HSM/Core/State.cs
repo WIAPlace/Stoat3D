@@ -17,7 +17,7 @@ namespace HSM {
         public void Add(IActivity a){ if (a != null) activities.Add(a); }
         
         protected virtual State GetInitialState() => null; // Initial child to enter when this state starts (null = this is the leaf)
-        protected virtual State GetTransition() => null; // Target state to switch to this frame (null = stay in current state)
+        protected virtual State GetTransition() => null; // Target state to switch to this frame (null = stay in current state) 
         
         // Lifecycle hooks
         protected virtual void OnEnter() { }

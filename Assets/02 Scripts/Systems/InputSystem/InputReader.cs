@@ -69,6 +69,10 @@ public class InputReader : ScriptableObject, InputSystem.IPlayerActions, InputSy
     public event Action JumpCancelledEvent;
     public event Action PauseEvent;
     public event Action ResumeEvent;
+    public event Action SprintEvent;
+    public event Action SprintCancelledEvent;
+    public event Action CrouchEvent;
+    public event Action CrouchCancelledEvent;
 
     ////// Player Events ///////////////
     /// 
@@ -87,6 +91,30 @@ public class InputReader : ScriptableObject, InputSystem.IPlayerActions, InputSy
         if (context.phase == InputActionPhase.Canceled)
         {
             JumpCancelledEvent?.Invoke();
+        }
+    }
+
+    public void OnSprint(UnityEngine.InputSystem.InputAction.CallbackContext context)
+    {
+        if (context.phase == InputActionPhase.Performed)
+        {
+            SprintEvent?.Invoke();
+        }
+        if (context.phase == InputActionPhase.Canceled)
+        {
+            SprintCancelledEvent?.Invoke();
+        }
+    }
+
+    public void OnCrouch(UnityEngine.InputSystem.InputAction.CallbackContext context)
+    {
+        if (context.phase == InputActionPhase.Performed)
+        {
+            CrouchEvent?.Invoke();
+        }
+        if (context.phase == InputActionPhase.Canceled)
+        {
+            CrouchCancelledEvent?.Invoke();
         }
     }
 
@@ -109,7 +137,6 @@ public class InputReader : ScriptableObject, InputSystem.IPlayerActions, InputSy
             SetPlayer();
         }
     }
-
 
     ///////////////////////////////////////////////////////////////////////// Functions 
     
@@ -137,22 +164,12 @@ public class InputReader : ScriptableObject, InputSystem.IPlayerActions, InputSy
         //throw new System.NotImplementedException();
     }
 
-    public void OnCrouch(UnityEngine.InputSystem.InputAction.CallbackContext context)
-    {
-        //throw new System.NotImplementedException();
-    }
-
     public void OnPrevious(UnityEngine.InputSystem.InputAction.CallbackContext context)
     {
         //throw new System.NotImplementedException();
     }
 
     public void OnNext(UnityEngine.InputSystem.InputAction.CallbackContext context)
-    {
-        //throw new System.NotImplementedException();
-    }
-
-    public void OnSprint(UnityEngine.InputSystem.InputAction.CallbackContext context)
     {
         //throw new System.NotImplementedException();
     }
