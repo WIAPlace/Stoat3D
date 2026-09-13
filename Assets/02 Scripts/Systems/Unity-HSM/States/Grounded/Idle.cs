@@ -16,6 +16,12 @@ namespace HSM {
         protected override State GetInitialState() => Stand;
 
         protected override State GetTransition() {
+            if(ctx.sprinting && ctx.crouching){
+                if(Mathf.Abs(ctx.velocity.x) <= 0.01f && Mathf.Abs(ctx.velocity.z) <=0.1f) 
+                {
+                    return null;
+                } 
+            }
             return Mathf.Abs(ctx.move.magnitude) > 0.01f ? ((Grounded)Parent).Move : null;
         }
 

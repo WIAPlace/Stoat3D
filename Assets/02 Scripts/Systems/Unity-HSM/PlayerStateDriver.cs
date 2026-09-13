@@ -260,11 +260,13 @@ namespace HSM {
             targetVisualDir = (cinCamTransform.forward * targetVisualDir.z) + (cinCamTransform.right * targetVisualDir.x);
             targetVisualDir.y = 0;
 
-            // Create the target rotation looking in that direction
-            Quaternion targetVisualRot = Quaternion.LookRotation(targetVisualDir);
+            if(targetVisualDir.magnitude > .01f){
+                // Create the target rotation looking in that direction
+                Quaternion targetVisualRot = Quaternion.LookRotation(targetVisualDir);
 
-            // Smoothly rotate toward the target rotation
-            visualBody.transform.rotation = Quaternion.Slerp(visualBody.transform.rotation, targetVisualRot, turnSpeed * tickTime);
+                // Smoothly rotate toward the target rotation
+                visualBody.transform.rotation = Quaternion.Slerp(visualBody.transform.rotation, targetVisualRot, turnSpeed * tickTime);
+            }
         }
     }
 }
