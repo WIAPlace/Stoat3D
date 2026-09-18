@@ -24,6 +24,8 @@ namespace HSM {
         StateMachine machine;
         State root;
 
+        
+
         // Awake //////////////////////////////////////////////////////////////////////////////////////////////////////////
         void Awake() {
             //rb = gameObject.GetOrAdd<Rigidbody>();
@@ -76,7 +78,6 @@ namespace HSM {
 
         // Update //////////////////////////////////////////////////////////////////////////////////////////////////////////
         void Update() {
-
             ctx.grounded = Physics.CheckSphere(groundCheck.position, groundRadius, groundMask);
 
             machine.Tick(Time.deltaTime);
@@ -97,7 +98,14 @@ namespace HSM {
             Vector3 tempVel = new Vector3(horizontalVel.x,gravVel,horizontalVel.z);
 
             controller.Move(tempVel * Time.deltaTime);
-        }   
+
+            // Debug
+            ctx.currentVelocityMag = (int)(tempVel.magnitude*100)/100;
+        }
+        void LateUpdate()
+        {
+            UpdateVisualPosition();
+        }
 
         // Misc /////////////////////////////////////////////////////////////////////////////////////////////////////////////
         void OnDrawGizmosSelected() {
@@ -118,6 +126,14 @@ namespace HSM {
             orb.HorizontalAxis.Recentering.Enabled = false;
         }
 
+        private void UpdateVisualPosition() // keep visuals in line with the body
+        {
+
+            ctx.visualBody.transform.position = Vector3.MoveTowards(ctx.visualBody.transform.position,ctx.body.transform.position,ctx.updateTime*Time.deltaTime);
+            //ctx.visualBody.transform.position = ctx.body.transform.position;
+            ctx.cameraPosition.position = Vector3.MoveTowards(ctx.cameraPosition.position,ctx.body.transform.position,ctx.updateTime*Time.deltaTime);
+            //ctx.cameraPosition.position = ctx.body.transform.position;
+        }
 
         // Events /////////////////////////////////////////////////////////////////////////////////////////////////////////////
         private void SetUpEvents()
@@ -218,6 +234,10 @@ namespace HSM {
         public float sprintMod = 2;
         public float crouchMod = .5f;
 
+        [Header("Visual Variables")]
+        [Tooltip("Speed the visual gameobject turns")]public float turnSpeed = 5;
+        public float updateTime = 1;
+
         // Bools
         [Header("Bools")]
         public bool jumpPressed;
@@ -225,12 +245,10 @@ namespace HSM {
         public bool sprinting;
         public bool crouching;
 
-        [Header("Visual Variables")]
-        [Tooltip("Speed the visual gameobject turns")]public float turnSpeed = 5;
-
         [Header("Refrences")]
         public GameObject body;
         public GameObject visualBody;
+        public Transform cameraPosition;
         public CharacterController controller;
         public CinemachineCamera cinCam;
         public Transform cinCamTransform => cinCam.transform;
@@ -239,8 +257,10 @@ namespace HSM {
         public Renderer renderer;
         
         [Header("Debug")]
+        public float currentVelocityMag;
         public State currentLeaf;
         public string debugCurrentLeaf;
+        
 
         public void TurnToForward(float tickTime)
         {
