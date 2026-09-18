@@ -482,7 +482,7 @@ GameObject:
   - component: {fileID: 346707375}
   - component: {fileID: 346707374}
   - component: {fileID: 346707373}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Wall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -673,7 +673,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 521313450}
-  m_Enabled: 0
+  m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -691,7 +691,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: 4717b199010ca4cb3a8a7a465ec457d2, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1302,7 +1302,7 @@ GameObject:
   - component: {fileID: 1585652276}
   - component: {fileID: 1585652275}
   - component: {fileID: 1585652274}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Wall (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1491,14 +1491,22 @@ MonoBehaviour:
     jumpForce: 7
     gravForce: 9.81
     drag: 0.3
+    wallRunForce: 0
+    maxWallRunTime: 0
+    wallRunTimer: 0
+    wallCheckDistance: 1
+    minJumpHeight: 0
     sprintMod: 2
     crouchMod: 0.5
     turnSpeed: 5
     updateTime: 100
     jumpPressed: 0
     grounded: 0
+    walled: 0
     sprinting: 0
     crouching: 0
+    wallLeft: 0
+    wallRight: 0
     body: {fileID: 521313450}
     visualBody: {fileID: 1734118605}
     cameraPosition: {fileID: 1626978932}
@@ -1515,6 +1523,9 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 128
+  wallMask:
+    serializedVersion: 2
+    m_Bits: 256
   drawGizmos: 1
 --- !u!1 &1734118605
 GameObject:

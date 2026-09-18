@@ -19,7 +19,18 @@ namespace HSM {
         }
         //protected override State GetInitialState() => Jump;
 
-        protected override State GetTransition() => ctx.grounded ? ((PlayerRoot)Parent).Grounded : null;
+        protected override State GetTransition()
+        {
+            if (ctx.grounded)
+            {
+                return ((PlayerRoot)Parent).Grounded;
+            }
+            if (ctx.walled)
+            {
+                return ((PlayerRoot)Parent).Walled;
+            }
+            return null;
+        } 
 
         protected override void OnEnter() {
             //Debug.Log(ctx.velocity);

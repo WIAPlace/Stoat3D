@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using Unity.Cinemachine;
 using System.Collections;
+using UnityEditor.Experimental.GraphView;
 //using UnityUtils;
 
 namespace HSM {
@@ -15,8 +16,11 @@ namespace HSM {
         public Transform groundCheck;
         public float groundRadius = 0.2f;
         public LayerMask groundMask;
+        public LayerMask wallMask;
         public bool drawGizmos = true;
         string lastPath;
+
+        
 
         CinemachineOrbitalFollow orb;
 
@@ -80,6 +84,8 @@ namespace HSM {
         void Update() {
             ctx.grounded = Physics.CheckSphere(groundCheck.position, groundRadius, groundMask);
 
+            CheckForWall();
+
             machine.Tick(Time.deltaTime);
 
             ctx.currentLeaf = machine.Root.Leaf();
@@ -133,6 +139,17 @@ namespace HSM {
             //ctx.visualBody.transform.position = ctx.body.transform.position;
             ctx.cameraPosition.position = Vector3.MoveTowards(ctx.cameraPosition.position,ctx.body.transform.position,ctx.updateTime*Time.deltaTime);
             //ctx.cameraPosition.position = ctx.body.transform.position;
+        }
+        private void CheckForWall()
+        {
+            ctx.wallRight = Physics.Raycast(ctx.body.transform.position,ctx.body.transform.right,out ctx.rightWallhit, ctx.wallCheckDistance,wallMask);
+            ctx.wallLeft = Physics.Raycast(ctx.body.transform.position,-ctx.body.transform.right,out ctx.leftWallhit, ctx.wallCheckDistance,wallMask);
+
+            if(ctx.wallRight || ctx.wallLeft)
+            {
+                ctx.walled = true;
+            }
+            else ctx.walled = false;
         }
 
         // Events /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -230,6 +247,15 @@ namespace HSM {
         public float gravForce = 9.81f;
         public float drag = 1;
 
+        [Header("Wall stuff")]
+        public float wallRunForce;
+        public float maxWallRunTime;
+        public float wallRunTimer;
+        public float wallCheckDistance;
+        public float minJumpHeight;
+        public RaycastHit leftWallhit;
+        public RaycastHit rightWallhit;
+
         [Header("State Modifiers")]
         public float sprintMod = 2;
         public float crouchMod = .5f;
@@ -242,8 +268,12 @@ namespace HSM {
         [Header("Bools")]
         public bool jumpPressed;
         public bool grounded;
+        public bool walled;
         public bool sprinting;
         public bool crouching;
+        public bool wallLeft;
+        public bool wallRight;
+        
 
         [Header("Refrences")]
         public GameObject body;
