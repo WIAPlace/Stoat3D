@@ -84,8 +84,6 @@ namespace HSM {
         void Update() {
             ctx.grounded = Physics.CheckSphere(groundCheck.position, groundRadius, groundMask);
 
-            CheckForWall();
-
             machine.Tick(Time.deltaTime);
 
             ctx.currentLeaf = machine.Root.Leaf();
@@ -140,17 +138,7 @@ namespace HSM {
             ctx.cameraPosition.position = Vector3.MoveTowards(ctx.cameraPosition.position,ctx.body.transform.position,ctx.updateTime*Time.deltaTime);
             //ctx.cameraPosition.position = ctx.body.transform.position;
         }
-        private void CheckForWall()
-        {
-            ctx.wallRight = Physics.Raycast(ctx.body.transform.position,ctx.body.transform.right,out ctx.rightWallhit, ctx.wallCheckDistance,wallMask);
-            ctx.wallLeft = Physics.Raycast(ctx.body.transform.position,-ctx.body.transform.right,out ctx.leftWallhit, ctx.wallCheckDistance,wallMask);
-
-            if(ctx.wallRight || ctx.wallLeft)
-            {
-                ctx.walled = true;
-            }
-            else ctx.walled = false;
-        }
+        
 
         // Events /////////////////////////////////////////////////////////////////////////////////////////////////////////////
         private void SetUpEvents()
@@ -246,15 +234,6 @@ namespace HSM {
         
         public float gravForce = 9.81f;
         public float drag = 1;
-
-        [Header("Wall stuff")]
-        public float wallRunForce;
-        public float maxWallRunTime;
-        public float wallRunTimer;
-        public float wallCheckDistance;
-        public float minJumpHeight;
-        public RaycastHit leftWallhit;
-        public RaycastHit rightWallhit;
 
         [Header("State Modifiers")]
         public float sprintMod = 2;
