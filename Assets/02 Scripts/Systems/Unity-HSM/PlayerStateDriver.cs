@@ -19,6 +19,7 @@ namespace HSM {
         public LayerMask wallMask;
         public bool drawGizmos = true;
         string lastPath;
+        float cyoteTimer=0;
 
         
 
@@ -82,7 +83,12 @@ namespace HSM {
 
         // Update //////////////////////////////////////////////////////////////////////////////////////////////////////////
         void Update() {
+            ctx.externalPush = Vector3.zero;
+
             ctx.grounded = Physics.CheckSphere(groundCheck.position, groundRadius, groundMask);
+
+            CheckForWallRun();
+
 
             machine.Tick(Time.deltaTime);
 
@@ -96,15 +102,23 @@ namespace HSM {
             }
 
             float gravVel = ctx.velocity.y; // maintain gravity
+            Vector3 horizontalVel;
+            if(!ctx.walled){
             // Move in the direction of the controller.
-            Vector3 horizontalVel = (body.transform.right * ctx.velocity.x) + (body.transform.forward * ctx.velocity.z);
+            horizontalVel = (body.transform.right * ctx.velocity.x) + (body.transform.forward * ctx.velocity.z);
+            }
+            else
+            {
+                horizontalVel = ctx.velocity;
+            }
 
             Vector3 tempVel = new Vector3(horizontalVel.x,gravVel,horizontalVel.z);
 
-            controller.Move(tempVel * Time.deltaTime);
+            controller.Move((tempVel * Time.deltaTime) + ctx.externalPush);
 
             // Debug
             ctx.currentVelocityMag = (int)(tempVel.magnitude*100)/100;
+            ctx.debugCurrentDir = tempVel;
         }
         void LateUpdate()
         {
@@ -138,9 +152,108 @@ namespace HSM {
             ctx.cameraPosition.position = Vector3.MoveTowards(ctx.cameraPosition.position,ctx.body.transform.position,ctx.updateTime*Time.deltaTime);
             //ctx.cameraPosition.position = ctx.body.transform.position;
         }
-        
+
+        private void CheckForWallRun()
+        {
+            // start by assuming we arnt touching a wall.
+            if(ctx.wallLeft) ctx.wallLeft = false;
+            if(ctx.wallRight) ctx.wallRight = false;
+
+            if(ctx.grounded) return;
+            
+            Vector3 currentNormal = Vector3.up;
+            Ray tempRay=default;
+            RaycastHit tempHit;
+            
+            
+
+            // if left was hit
+            Ray ray = new Ray(ctx.body.transform.position, -ctx.body.transform.right);
+            if(Physics.Raycast(ray,out tempHit, ctx.wallRayDistance, wallMask)) // Left
+            {
+                //Debug.Log("Left Hit");
+                ctx.wallLeft = true; 
+                //ctx.rayDirection = ray.direction;
+                currentNormal = tempHit.normal;
+                tempRay = ray;
+                ctx.wallHit = tempHit;
+            }
+
+            // if right was hit
+            ray = new Ray(ctx.body.transform.position, ctx.body.transform.right);
+            if(Physics.Raycast(ray,out tempHit, ctx.wallRayDistance, wallMask)) // Right
+            {
+                //Debug.Log("Right Hit");
+                ctx.wallRight = true; 
+                //ctx.rayDirection = ray.direction;
+                currentNormal = tempHit.normal;
+                tempRay = ray;
+                ctx.wallHit = tempHit;
+            }
+
+            // Check if the current normal is moving;
+            if(currentNormal != Vector3.up && tempRay.direction != Vector3.zero)
+            {
+                bool currentToLast = true;
+                float dot = Mathf.Abs(Vector3.Dot(tempRay.direction.normalized, currentNormal));
+                ctx.debugDot = dot;
+                if(dot < ctx.wallDegreeThreshold)
+                {
+                    //Debug.Log("doted");
+                    if(ctx.walled)ctx.wallHit = ctx.previousHit;
+                    else
+                    {   // ignore if it is perpindicular to begin with
+                        currentToLast = false;
+                        ctx.wallRight=false;
+                        ctx.wallLeft=false;
+                    }
+                }
+                
+
+                if(currentToLast){  
+                    ctx.lastHitNormal = currentNormal;
+                }
+                ctx.previousHit = ctx.wallHit;
+            }
+
+            // Walled Bool
+            if(ctx.wallRight && ctx.wallLeft) // temp solution in case something is weird.
+            {
+                ctx.walled = false;
+                cyoteTimer = 0;
+            }
+            else if(ctx.wallRight || ctx.wallLeft)
+            {
+                ctx.walled = true;
+                cyoteTimer = 0;
+            }
+            else
+            {
+                if(ctx.walled && cyoteTimer <= ctx.cyoteTime)
+                {
+                    cyoteTimer += Time.deltaTime;
+                    //Debug.Log("CyoteTime: " + cyoteTimer);
+                    ctx.walled = true;
+                }
+                else{ 
+                    ctx.walled = false;
+                    cyoteTimer = 0;
+                }
+            }
+
+        }
+
+        // Gizmos /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        private void OnDrawGizmos()
+        {
+            Gizmos.color = Color.blue;
+            
+            if(ctx.currentVelocityMag > .01f) Gizmos.DrawLine(ctx.body.transform.position, ctx.body.transform.position + ctx.debugCurrentDir*2);
+        }
+
 
         // Events /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
         private void SetUpEvents()
         {
             input.MoveEvent += HandleMove;
@@ -235,6 +348,17 @@ namespace HSM {
         public float gravForce = 9.81f;
         public float drag = 1;
 
+        public float cyoteTime = .3f;
+
+        [Header("Wall Stuff")]
+        public float wallRayDistance;
+        public float wallDegreeThreshold = .1f;
+        public float wallSnapLength = .7f;
+        //[HideInInspector] public Vector3 rayDirection;
+        public RaycastHit wallHit;
+        public RaycastHit previousHit; 
+
+
         [Header("State Modifiers")]
         public float sprintMod = 2;
         public float crouchMod = .5f;
@@ -264,11 +388,16 @@ namespace HSM {
         public Animator anim;
         //public Rigidbody rb;
         public Renderer renderer;
+        [HideInInspector] public Vector3 lastPosition;
+        [HideInInspector] public Vector3 lastHitNormal;
+        [HideInInspector] public Vector3 externalPush;
         
         [Header("Debug")]
         public float currentVelocityMag;
         public State currentLeaf;
         public string debugCurrentLeaf;
+        public Vector3 debugCurrentDir;
+        public float debugDot;
         
 
         public void TurnToForward(float tickTime)
