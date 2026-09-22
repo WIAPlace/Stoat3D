@@ -1756,7 +1756,7 @@ MonoBehaviour:
   RecenteringTarget: 3
   HorizontalAxis:
     Value: 0
-    Center: -0
+    Center: 0
     Range: {x: -180, y: 180}
     Wrap: 1
     Recentering:
@@ -2144,9 +2144,6 @@ MonoBehaviour:
     wallRayDistance: 2
     wallDegreeThreshold: 0.4
     wallSnapLength: 0.7
-    wallJumpForceMod: 8
-    wallJumpAngle: 70
-    wallJumpToggleTime: 3
     sprintMod: 2
     crouchMod: 0.5
     turnSpeed: 5
@@ -2156,10 +2153,8 @@ MonoBehaviour:
     walled: 0
     sprinting: 0
     crouching: 0
-    wallLeft: 1
-    wallRight: 1
-    toggleLeft: 0
-    toggleRight: 0
+    wallLeft: 0
+    wallRight: 0
     body: {fileID: 521313450}
     visualBody: {fileID: 1734118605}
     cameraPosition: {fileID: 1626978932}

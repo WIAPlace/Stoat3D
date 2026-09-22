@@ -54,8 +54,7 @@ namespace HSM {
 
             // Set Up Events 
             SetUpEvents();
-
-
+    
             // fallback: create a groundCheck just below the collider's bounds
             if (groundCheck == null) {
                 var col = body.GetComponent<Collider>();
@@ -87,6 +86,7 @@ namespace HSM {
 
             ctx.grounded = Physics.CheckSphere(groundCheck.position, groundRadius, groundMask);
 
+        
             CheckForWallRun();
 
 
@@ -103,12 +103,14 @@ namespace HSM {
 
             float gravVel = ctx.velocity.y; // maintain gravity
             Vector3 horizontalVel;
+
             if(!ctx.walled){
-            // Move in the direction of the controller.
-            horizontalVel = (body.transform.right * ctx.velocity.x) + (body.transform.forward * ctx.velocity.z);
+                // Move in the direction of the controller.
+                horizontalVel = (body.transform.right * ctx.velocity.x) + (body.transform.forward * ctx.velocity.z);
             }
             else
             {
+                //horizontalVel = (body.transform.right * ctx.velocity.x) + (body.transform.forward * ctx.velocity.z);
                 horizontalVel = ctx.velocity;
             }
 
@@ -354,9 +356,12 @@ namespace HSM {
         public float wallRayDistance;
         public float wallDegreeThreshold = .1f;
         public float wallSnapLength = .7f;
+        public float wallJumpForceMod;
+        public float wallJumpAngle = 45f;
         //[HideInInspector] public Vector3 rayDirection;
         public RaycastHit wallHit;
         public RaycastHit previousHit; 
+        
 
 
         [Header("State Modifiers")]
@@ -377,7 +382,7 @@ namespace HSM {
         public bool wallLeft;
         public bool wallRight;
         
-
+        
         [Header("Refrences")]
         public GameObject body;
         public GameObject visualBody;
@@ -426,5 +431,6 @@ namespace HSM {
                 visualBody.transform.rotation = Quaternion.Slerp(visualBody.transform.rotation, targetVisualRot, turnSpeed * tickTime);
             }
         }
+    
     }
 }
