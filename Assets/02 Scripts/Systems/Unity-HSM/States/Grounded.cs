@@ -19,7 +19,7 @@ namespace HSM {
 
         // Get Transition Occurs from top of the states to the bottom
         protected override State GetTransition() {
-            if (ctx.jumpPressed) { // Jump
+            if (ctx.jumpPressed && ctx.simpleJump) { // Jump
                 //ctx.jumpPressed = false;
                 ctx.velocity.y = ctx.jumpForce;
                 ctx.jumpPressed = false;
@@ -30,7 +30,7 @@ namespace HSM {
         }
         protected override void OnEnter()
         {
-            //Debug.Log("Entered Grounded");
+            ctx.simpleJump = true; // make sure this is true by default in case it some how got left off;
         }
 
         // On Update Occurs from the bottom of the tree to the top

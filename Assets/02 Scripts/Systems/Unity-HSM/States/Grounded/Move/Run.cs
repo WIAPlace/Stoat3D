@@ -24,15 +24,15 @@ public class Run : State
         {
             return ((Move)Parent).Slide;
         }
+        if (ctx.crouching)
+        {
+            return ((Move)Parent).Slide;
+        }
         if (!ctx.sprinting)
         {
             return ((Move)Parent).Walk;
         }
-        if (ctx.crouching)
-        {
-            return ((Move)Parent).MovingCrouch;
-        }
-
+        
         return null;
     }
     

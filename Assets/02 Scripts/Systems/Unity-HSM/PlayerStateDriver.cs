@@ -345,14 +345,27 @@ namespace HSM {
         public float decel = 50f;
         public float slideDecel = 10f;
 
-        public float jumpForce = 7f;
         
         public float gravForce = 9.81f;
         public float drag = 1;
 
         public float cyoteTime = .3f;
 
-        [Header("Wall Stuff")]
+
+        [Header("State Modifiers")]
+        public float sprintMod = 2;
+        public float crouchMod = .5f;
+        [Tooltip("After letting off the sprint button wait till this percentage of sprint mod is up until sliding is not the effect of crouching"),Range(0,1)]
+        public float slideThreshold = .8f;
+
+
+        [Header("Jump Modifiers")]
+        public float jumpForce = 7f;
+        public float slideJumpMod = 1.3f; // mutiply horizontal force
+        public float crouchJumpMod = 1.2f; // multiply vertical force
+
+
+        [Header("Wall State Modifiers")]
         public float wallRayDistance;
         public float wallDegreeThreshold = .1f;
         public float wallSnapLength = .7f;
@@ -361,12 +374,6 @@ namespace HSM {
         //[HideInInspector] public Vector3 rayDirection;
         public RaycastHit wallHit;
         public RaycastHit previousHit; 
-        
-
-
-        [Header("State Modifiers")]
-        public float sprintMod = 2;
-        public float crouchMod = .5f;
 
         [Header("Visual Variables")]
         [Tooltip("Speed the visual gameobject turns")]public float turnSpeed = 5;
@@ -375,6 +382,7 @@ namespace HSM {
         // Bools
         [Header("Bools")]
         public bool jumpPressed;
+        public bool simpleJump; // used for if the basic jump can be used in grounded state
         public bool grounded;
         public bool walled;
         public bool sprinting;

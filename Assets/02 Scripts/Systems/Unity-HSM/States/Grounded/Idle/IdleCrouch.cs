@@ -10,6 +10,25 @@ public class IdleCrouch : State
     }
     protected override State GetTransition()
     {
+        if (ctx.jumpPressed) { // Crouch Jump
+            //ctx.jumpPressed = false;
+            ctx.velocity.y = ctx.jumpForce*ctx.crouchJumpMod;
+            ctx.jumpPressed = false;
+
+            return ((PlayerRoot)Parent.Parent.Parent).Airborne;
+        }
+
         return ctx.crouching ? null : ((Idle)Parent).Stand;
+    }
+    protected override void OnEnter()
+    {
+        if(ctx.crouching)
+        {
+            ctx.simpleJump = false;
+        }
+    }
+    protected override void OnExit()
+    {
+        ctx.simpleJump = true;
     }
 }

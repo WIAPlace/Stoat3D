@@ -32,6 +32,13 @@ public class MovingCrouch : State
         {
             return ((Move)Parent).Walk;
         }
+        if (ctx.jumpPressed) { // Crouch Jump
+            //ctx.jumpPressed = false;
+            ctx.velocity.y = ctx.jumpForce*ctx.crouchJumpMod;
+            ctx.jumpPressed = false;
+
+            return ((PlayerRoot)Parent.Parent.Parent).Airborne;
+        }
 
         return null;
     }
@@ -41,7 +48,12 @@ public class MovingCrouch : State
         if(ctx.crouching)
         {
             ctx.currentMoveSpeed = ctx.moveSpeed * ctx.crouchMod;
+            ctx.simpleJump = false;
         }
+    }
+    protected override void OnExit()
+    {
+        ctx.simpleJump = true;
     }
 
 

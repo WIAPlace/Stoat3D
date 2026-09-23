@@ -2137,29 +2137,30 @@ MonoBehaviour:
     accel: 40
     decel: 50
     slideDecel: 10
-    jumpForce: 7
     gravForce: 9.81
     drag: 0.3
     cyoteTime: 0.1
+    sprintMod: 2
+    crouchMod: 0.5
+    slideThreshold: 1.887
+    jumpForce: 7
+    slideJumpMod: 1.3
+    crouchJumpMod: 1.4
     wallRayDistance: 2
     wallDegreeThreshold: 0.4
     wallSnapLength: 0.7
     wallJumpForceMod: 8
     wallJumpAngle: 70
-    wallJumpToggleTime: 3
-    sprintMod: 2
-    crouchMod: 0.5
     turnSpeed: 5
     updateTime: 100
     jumpPressed: 0
+    simpleJump: 0
     grounded: 0
     walled: 0
     sprinting: 0
     crouching: 0
-    wallLeft: 1
-    wallRight: 1
-    toggleLeft: 0
-    toggleRight: 0
+    wallLeft: 0
+    wallRight: 0
     body: {fileID: 521313450}
     visualBody: {fileID: 1734118605}
     cameraPosition: {fileID: 1626978932}

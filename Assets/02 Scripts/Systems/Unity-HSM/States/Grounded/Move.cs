@@ -41,8 +41,9 @@ namespace HSM {
             if(ctx.currentMoveSpeed >= ctx.moveSpeed) rateOfChange = ctx.accel;
             else if(ctx.currentMoveSpeed < ctx.moveSpeed)
             {
-                if(ctx.sprinting && ctx.crouching) rateOfChange = ctx.slideDecel;
+                if(ctx.currentLeaf == Slide) rateOfChange = ctx.slideDecel;
                 else rateOfChange = ctx.decel;
+                
             }
 
             targetx = Mathf.MoveTowards(ctx.velocity.x, targetx, rateOfChange*deltaTime);

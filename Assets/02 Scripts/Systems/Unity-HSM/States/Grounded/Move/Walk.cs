@@ -28,6 +28,10 @@ public class Walk : State
         {
             return ((Move)Parent).Run;
         }
+        if (ctx.crouching && ctx.currentVelocityMag >= ctx.moveSpeed*(ctx.sprintMod*ctx.slideThreshold))
+        {
+            return ((Move)Parent).Slide;
+        }
         if (ctx.crouching)
         {
             return ((Move)Parent).MovingCrouch;
