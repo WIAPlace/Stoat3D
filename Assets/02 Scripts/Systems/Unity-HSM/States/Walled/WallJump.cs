@@ -21,7 +21,14 @@ public class WallJump :  State
         // Rotate the normal 45 degrees upward around that axis
         Vector3 tiltedNormal = Quaternion.AngleAxis(ctx.wallJumpAngle, rotationAxis) * hitNormal;
 
-        ctx.velocity += tiltedNormal * ctx.jumpForce;
+        // Alter velocity to make jump at more of an angle.
+        Vector3 newVel = ctx.velocity;
+
+        newVel.x*=ctx.wallJumpMoveEffect;
+        newVel.z*=ctx.wallJumpMoveEffect;
+        newVel += tiltedNormal * ctx.wallJumpForceMod;
+
+        ctx.velocity = newVel;
     }
 
     protected override void OnUpdate(float deltaTime)

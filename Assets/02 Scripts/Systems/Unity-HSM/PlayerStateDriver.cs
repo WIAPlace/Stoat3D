@@ -21,10 +21,6 @@ namespace HSM {
         string lastPath;
         float cyoteTimer=0;
 
-        
-
-        CinemachineOrbitalFollow orb;
-
         CharacterController controller;
         StateMachine machine;
         State root;
@@ -67,12 +63,7 @@ namespace HSM {
 
             //ctx.cinCam.ForceCameraPosition()
         }
-        void Start()
-        {
-            orb = ctx.cinCam.GetComponent<CinemachineOrbitalFollow>();    
-            orb.HorizontalAxis.Recentering.Enabled = true;
-            StartCoroutine(DisableRecentering());
-        }
+        
 
         // Destroy //////////////////////////////////////////////////////////////////////////////////////////////////////////
         void OnDestroy()
@@ -139,12 +130,8 @@ namespace HSM {
             return string.Join(" > ", s.PathToRoot().Reverse().Select(n => n.GetType().Name));
         }
 
-        // Weird start up stuff ////////////////////////////////////////////////////////////////////////////////////////////////
-        IEnumerator DisableRecentering()
-        {
-            yield return new WaitForSeconds(1f);
-            orb.HorizontalAxis.Recentering.Enabled = false;
-        }
+        // Weird start up stuff ///////////////////////////////////////////////////////////////////////////////////////////////
+        
 
         private void UpdateVisualPosition() // keep visuals in line with the body
         {
@@ -363,6 +350,7 @@ namespace HSM {
         public float jumpForce = 7f;
         public float slideJumpMod = 1.3f; // mutiply horizontal force
         public float crouchJumpMod = 1.2f; // multiply vertical force
+         
 
 
         [Header("Wall State Modifiers")]
@@ -371,6 +359,7 @@ namespace HSM {
         public float wallSnapLength = .7f;
         public float wallJumpForceMod;
         public float wallJumpAngle = 45f;
+        [Range(.0001f,1)]public float wallJumpMoveEffect;
         //[HideInInspector] public Vector3 rayDirection;
         public RaycastHit wallHit;
         public RaycastHit previousHit; 
