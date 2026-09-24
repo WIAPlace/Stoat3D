@@ -11,7 +11,8 @@ public class WallSlide : State
 
     protected override State GetTransition()
     {
-        return base.GetTransition();
+        
+        return null;
     }
     
     protected override void OnEnter()

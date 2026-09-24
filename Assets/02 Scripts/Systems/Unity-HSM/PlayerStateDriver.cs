@@ -131,7 +131,7 @@ namespace HSM {
         }
 
         // Weird start up stuff ///////////////////////////////////////////////////////////////////////////////////////////////
-        
+
 
         private void UpdateVisualPosition() // keep visuals in line with the body
         {
@@ -186,7 +186,11 @@ namespace HSM {
                 bool currentToLast = true;
                 float dot = Mathf.Abs(Vector3.Dot(tempRay.direction.normalized, currentNormal));
                 ctx.debugDot = dot;
-                if(dot < ctx.wallDegreeThreshold)
+
+                // change degree threshhold for if we are on a wall
+                float degreeThreshold = ctx.walled ? ctx.onWallDegreeThreshold : ctx.wallDegreeThreshold;
+
+                if(dot < degreeThreshold)
                 {
                     //Debug.Log("doted");
                     if(ctx.walled)ctx.wallHit = ctx.previousHit;
@@ -356,6 +360,7 @@ namespace HSM {
         [Header("Wall State Modifiers")]
         public float wallRayDistance;
         public float wallDegreeThreshold = .1f;
+        public float onWallDegreeThreshold = .1f;
         public float wallSnapLength = .7f;
         public float wallJumpForceMod;
         public float wallJumpAngle = 45f;
