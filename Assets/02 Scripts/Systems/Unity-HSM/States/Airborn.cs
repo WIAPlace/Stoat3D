@@ -25,6 +25,10 @@ namespace HSM {
             {
                 return ((PlayerRoot)Parent).Grounded;
             }
+            if (ctx.ledgeGrabbed)
+            {
+                return ((PlayerRoot)Parent).LedgeGrab;
+            }
             if (ctx.walled)
             {
                 return ((PlayerRoot)Parent).Walled;

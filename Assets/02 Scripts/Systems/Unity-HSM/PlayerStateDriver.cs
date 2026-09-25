@@ -5,7 +5,8 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using Unity.Cinemachine;
 using System.Collections;
-using UnityEditor.Experimental.GraphView;
+using System.Threading.Tasks;
+using System.Threading;
 //using UnityUtils;
 
 namespace HSM {
@@ -77,7 +78,7 @@ namespace HSM {
 
             ctx.grounded = Physics.CheckSphere(groundCheck.position, groundRadius, groundMask);
 
-        
+            LedgeDetection();
             CheckForWallRun();
 
 
@@ -95,7 +96,7 @@ namespace HSM {
             float gravVel = ctx.velocity.y; // maintain gravity
             Vector3 horizontalVel;
 
-            if(!ctx.walled){
+            if(!ctx.walled && !ctx.ledgeGrabbed){
                 // Move in the direction of the controller.
                 horizontalVel = (body.transform.right * ctx.velocity.x) + (body.transform.forward * ctx.velocity.z);
             }
@@ -148,7 +149,7 @@ namespace HSM {
             if(ctx.wallLeft) ctx.wallLeft = false;
             if(ctx.wallRight) ctx.wallRight = false;
 
-            if(ctx.grounded) return;
+            if(ctx.grounded || ctx.ledgeGrabbed) return;
             
             Vector3 currentNormal = Vector3.up;
             Ray tempRay=default;
@@ -235,6 +236,24 @@ namespace HSM {
             }
 
         }
+
+        private void LedgeDetection()
+        {
+            if(ctx.grounded || ctx.walled || ctx.ledgeGrabbed) return;
+            
+            bool ledgeDetected = Physics.SphereCast(ctx.body.transform.position, ctx.ledgeSphereRadius,ctx.body.transform.forward, out ctx.ledgeHit,ctx.ledgeDetectionLength,ctx.ledgeMask);
+
+            if(!ledgeDetected) return;
+
+            float distanceToLedge = Vector3.Distance(ctx.body.transform.position,ctx.ledgeHit.transform.position);
+            ctx.currLedge = ctx.ledgeHit.transform;
+
+            if(distanceToLedge < ctx.maxLedgeGrabDistance && ctx.currLedge != ctx.lastLedge) {
+                ctx.ledgeGrabbed = true;
+            } 
+        }
+
+
 
         // Gizmos /////////////////////////////////////////////////////////////////////////////////////////////////////////////
         private void OnDrawGizmos()
@@ -369,6 +388,19 @@ namespace HSM {
         public RaycastHit wallHit;
         public RaycastHit previousHit; 
 
+        [Header("Ledge Detection")]
+        public float ledgeDetectionLength;
+        public float ledgeSphereRadius;
+        public LayerMask ledgeMask;
+        [HideInInspector]public Transform lastLedge;
+        [HideInInspector]public Transform currLedge;
+        public RaycastHit ledgeHit;
+
+        public float moveToLedgeSpeed;
+        public float maxLedgeGrabDistance;
+        public float horizontalLedgeJumpForce;
+        public float verticalLedgeJumpMod;
+
         [Header("Visual Variables")]
         [Tooltip("Speed the visual gameobject turns")]public float turnSpeed = 5;
         public float updateTime = 1;
@@ -379,10 +411,12 @@ namespace HSM {
         public bool simpleJump; // used for if the basic jump can be used in grounded state
         public bool grounded;
         public bool walled;
+        public bool ledgeGrabbed;
         public bool sprinting;
         public bool crouching;
         public bool wallLeft;
         public bool wallRight;
+        
         
         
         [Header("Refrences")]
@@ -398,6 +432,7 @@ namespace HSM {
         [HideInInspector] public Vector3 lastPosition;
         [HideInInspector] public Vector3 lastHitNormal;
         [HideInInspector] public Vector3 externalPush;
+        private CancellationTokenSource _cts = new CancellationTokenSource();
         
         [Header("Debug")]
         public float currentVelocityMag;
@@ -431,7 +466,29 @@ namespace HSM {
 
                 // Smoothly rotate toward the target rotation
                 visualBody.transform.rotation = Quaternion.Slerp(visualBody.transform.rotation, targetVisualRot, turnSpeed * tickTime);
-            }
+            }            
+        }
+
+        ////// Async Stuff
+        public void LastLedgeReset()
+        {
+            ResetToken();
+
+            _ = ResetLastLedge(_cts.Token);
+                
+        }
+
+        public void ResetToken()
+        {
+            _cts.Cancel();
+            _cts.Dispose();
+            _cts = new CancellationTokenSource();
+        }
+
+        private async Task ResetLastLedge(CancellationToken token)
+        {
+           await Awaitable.WaitForSecondsAsync(1.0f, token);
+           lastLedge = null;
         }
     
     }
