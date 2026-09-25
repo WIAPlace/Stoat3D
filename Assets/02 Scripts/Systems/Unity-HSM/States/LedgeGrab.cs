@@ -28,7 +28,11 @@ public class LedgeGrab : State {
 
     protected override void OnEnter()
     {
-        
+        //Vector3 directionToLedge = ctx.currLedge.position - ctx.body.transform.position;
+        //directionToLedge.y = 0;
+        //ctx.body.transform.rotation = Quaternion.LookRotation(directionToLedge.normalized);
+
+
         ctx.lastLedge = ctx.ledgeHit.transform;
 
         ctx.velocity = Vector3.zero;
@@ -68,6 +72,9 @@ public class LedgeGrab : State {
                 ctx.velocity = Vector3.zero;
             }
         }
+
+        //turn mech body to rotate to camera
+        ctx.TurnMechanicalBodyForward(deltaTime);
     }
 
     

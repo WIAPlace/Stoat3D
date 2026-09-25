@@ -158,7 +158,7 @@ namespace HSM {
             
 
             // if left was hit
-            Ray ray = new Ray(ctx.body.transform.position, -ctx.body.transform.right);
+            Ray ray = new Ray(ctx.visualBody.transform.position, -ctx.visualBody.transform.right);
             if(Physics.Raycast(ray,out tempHit, ctx.wallRayDistance, wallMask)) // Left
             {
                 //Debug.Log("Left Hit");
@@ -170,7 +170,7 @@ namespace HSM {
             }
 
             // if right was hit
-            ray = new Ray(ctx.body.transform.position, ctx.body.transform.right);
+            ray = new Ray(ctx.visualBody.transform.position, ctx.visualBody.transform.right);
             if(Physics.Raycast(ray,out tempHit, ctx.wallRayDistance, wallMask)) // Right
             {
                 //Debug.Log("Right Hit");
@@ -241,11 +241,11 @@ namespace HSM {
         {
             if(ctx.grounded || ctx.walled || ctx.ledgeGrabbed) return;
             
-            bool ledgeDetected = Physics.SphereCast(ctx.body.transform.position, ctx.ledgeSphereRadius,ctx.body.transform.forward, out ctx.ledgeHit,ctx.ledgeDetectionLength,ctx.ledgeMask);
+            bool ledgeDetected = Physics.SphereCast(ctx.visualBody.transform.position, ctx.ledgeSphereRadius,ctx.visualBody.transform.forward, out ctx.ledgeHit,ctx.ledgeDetectionLength,ctx.ledgeMask);
 
             if(!ledgeDetected) return;
 
-            float distanceToLedge = Vector3.Distance(ctx.body.transform.position,ctx.ledgeHit.transform.position);
+            float distanceToLedge = Vector3.Distance(ctx.visualBody.transform.position,ctx.ledgeHit.transform.position);
             ctx.currLedge = ctx.ledgeHit.transform;
 
             if(distanceToLedge < ctx.maxLedgeGrabDistance && ctx.currLedge != ctx.lastLedge) {
@@ -383,7 +383,7 @@ namespace HSM {
         public float wallSnapLength = .7f;
         public float wallJumpForceMod;
         public float wallJumpAngle = 45f;
-        [Range(.0001f,1)]public float wallJumpMoveEffect;
+        [Range(.0001f,2)]public float wallJumpMoveEffect;
         //[HideInInspector] public Vector3 rayDirection;
         public RaycastHit wallHit;
         public RaycastHit previousHit; 
@@ -445,6 +445,14 @@ namespace HSM {
         public void TurnToForward(float tickTime)
         {
             /////////////////////////// Real Body
+            TurnMechanicalBodyForward(tickTime);
+
+            ///////////////////////// Visual
+            TurnVisualBodyToMechForward(tickTime);
+        }
+
+        public void TurnMechanicalBodyForward(float tickTime)
+        {
             // Get the forward direction of the target transform
             Vector3 targetDir = new Vector3(cinCamTransform.forward.x,0,cinCamTransform.forward.z);
             
@@ -453,8 +461,10 @@ namespace HSM {
             
             // Smoothly rotate toward the target rotation
             body.transform.rotation = Quaternion.Slerp(body.transform.rotation, targetRotation, turnSpeed * tickTime);
+        }
 
-            ///////////////////////// Visual
+        public void TurnVisualBodyToMechForward(float tickTime)
+        {
             /// get the movment direction from the normals of the players velocity
             Vector3 targetVisualDir = velocity.normalized;
             targetVisualDir = (cinCamTransform.forward * targetVisualDir.z) + (cinCamTransform.right * targetVisualDir.x);
@@ -466,7 +476,7 @@ namespace HSM {
 
                 // Smoothly rotate toward the target rotation
                 visualBody.transform.rotation = Quaternion.Slerp(visualBody.transform.rotation, targetVisualRot, turnSpeed * tickTime);
-            }            
+            }  
         }
 
         ////// Async Stuff

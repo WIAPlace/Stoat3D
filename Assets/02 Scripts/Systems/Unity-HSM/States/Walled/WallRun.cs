@@ -11,6 +11,9 @@ public class WallRun : State
     public float tolerance = .1f;
     private bool stuck=false;
     public Vector3 playerForward;
+    private bool jumpPressed = false;
+    private float jumpSuppresed = 0;
+
 
     public WallRun(StateMachine m, State parent, PlayerContext ctx) : base(m, parent) {
         this.ctx = ctx;
@@ -18,7 +21,7 @@ public class WallRun : State
 
     protected override State GetTransition()
     {
-        if (ctx.jumpPressed)
+        if (jumpPressed&&jumpSuppresed > .1f)
         {
             return ((Walled)Parent).WallJump;
         }
@@ -34,8 +37,10 @@ public class WallRun : State
         initialVelocity = ctx.currentVelocityMag;
         ctx.lastPosition = ctx.body.transform.position;
 
-        playerForward = ctx.body.transform.forward.normalized;
+        playerForward = ctx.visualBody.transform.forward.normalized;
         stuck=false;
+        jumpPressed = false;
+        jumpSuppresed = 0;
     }
 
     protected override void OnUpdate(float deltaTime)
@@ -67,5 +72,11 @@ public class WallRun : State
         ctx.body.transform.forward = surfaceTangent; // turn body to face forward along the walls rotation
 
         ctx.velocity = surfaceTangent * ctx.currentMoveSpeed;
+
+        if (ctx.jumpPressed)
+        {
+            jumpPressed = true;
+        }
+        jumpSuppresed += deltaTime;
     }
 }
