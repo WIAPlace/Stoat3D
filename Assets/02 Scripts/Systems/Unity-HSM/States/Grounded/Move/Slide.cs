@@ -1,12 +1,10 @@
 using HSM;
+using UnityEditor;
 using UnityEngine;
 
 public class Slide : State
 {
-    readonly PlayerContext ctx;
-
-    float raycastLength = .5f;
-    
+    readonly PlayerContext ctx;    
 
     public Slide(StateMachine m, State parent, PlayerContext ctx) : base(m, parent) {
         this.ctx = ctx;
@@ -65,34 +63,13 @@ public class Slide : State
     protected override void OnUpdate(float deltaTime)
     {
         // Fire a ray downwards to get the ground normal
-        if (Physics.Raycast(ctx.body.transform.position, Vector3.down, out RaycastHit hit, raycastLength))
-        {
-            Vector3 groundNormal = hit.normal;
+        float groundAngle = Vector3.Angle(ctx.visualBody.transform.forward,ctx.groundHit.normal);
 
-            Vector3 moveDirection = (ctx.visualBody.transform.forward*ctx.move.z) + (ctx.visualBody.transform.right*ctx.move.x);
+        //groundAngle-=90;
 
-            // Project your input movement onto the slope plane
-            Vector3 slopeMoveDirection = Vector3.ProjectOnPlane(moveDirection, groundNormal).normalized;
+        float percentage = Mathf.InverseLerp(0f,180f,groundAngle);
+        float newMapping = Mathf.Lerp(ctx.slopeMapping,-ctx.slopeMapping,percentage);
 
-            // Check if we are actually tracking a slope angle
-            float angle = Vector3.Angle(groundNormal, Vector3.up);
-
-            if (angle > 0 && moveDirection.magnitude > 0)
-            {
-                // slopeMoveDirection.y will be positive moving up, negative moving down
-                // Subtracting it from 1.0f means:
-                // Uphill (pos Y) -> multiplier < 1 (slower)
-                // Downhill (neg Y) -> multiplier > 1 (faster)
-                float speedMultiplier = 1.0f - (slopeMoveDirection.y * ctx.slopeSlideInfluence);
-                
-                // Clamp multiplier so the player never stops completely or zooms too fast
-                //speedMultiplier = Mathf.Clamp(speedMultiplier, 0.5f, 1.5f);
-
-                ctx.currentMoveSpeed = ctx.moveSpeed * speedMultiplier;
-            }
-        }
-
-        // Return flat ground movement if no slope/ground detected
-        ctx.currentMoveSpeed = 0;
+        ctx.currentMoveSpeed = newMapping*ctx.slopeSlideInfluence*ctx.moveSpeed;
     }
 }

@@ -15,12 +15,12 @@ namespace HSM {
         public InputReader input;
         public GameObject body;
         public Transform groundCheck;
-        public float groundRadius = 0.2f;
         public LayerMask groundMask;
         public LayerMask wallMask;
         public bool drawGizmos = true;
         string lastPath;
         float cyoteTimer=0;
+        float gravVel;
 
         CharacterController controller;
         StateMachine machine;
@@ -76,12 +76,14 @@ namespace HSM {
         void Update() {
             ctx.externalPush = Vector3.zero;
 
-            ctx.grounded = Physics.CheckSphere(groundCheck.position, groundRadius, groundMask);
-
-            LedgeDetection();
-            CheckForWallRun();
-
-
+            ctx.grounded = Physics.CheckSphere(groundCheck.position, ctx.groundCheckLength, groundMask);
+            if(ctx.grounded) Physics.Raycast(groundCheck.position,Vector3.down,out ctx.groundHit,ctx.groundCheckLength, groundMask);
+            else
+            {
+                LedgeDetection();
+                CheckForWallRun();
+            }
+            
             machine.Tick(Time.deltaTime);
 
             ctx.currentLeaf = machine.Root.Leaf();
@@ -93,20 +95,26 @@ namespace HSM {
                 lastPath = path;
             }
 
-            float gravVel = ctx.velocity.y; // maintain gravity
+            gravVel = ctx.velocity.y; // maintain gravity
             Vector3 horizontalVel;
 
             if(!ctx.walled && !ctx.ledgeGrabbed){
                 // Move in the direction of the controller.
                 horizontalVel = (body.transform.right * ctx.velocity.x) + (body.transform.forward * ctx.velocity.z);
+                if (ctx.grounded)
+                {
+                    horizontalVel = AdjustVelocityToSlope(horizontalVel);
+                    //horizontalVel *= ctx.moveSpeed;
+                }
             }
             else
             {
                 //horizontalVel = (body.transform.right * ctx.velocity.x) + (body.transform.forward * ctx.velocity.z);
                 horizontalVel = ctx.velocity;
             }
-
-            Vector3 tempVel = new Vector3(horizontalVel.x,gravVel,horizontalVel.z);
+            Vector3 gravVector = new Vector3(0,gravVel,0);
+            //Vector3 tempVel = new Vector3(horizontalVel.x,gravVel,horizontalVel.z);
+            Vector3 tempVel = horizontalVel + gravVector;
 
             controller.Move((tempVel * Time.deltaTime) + ctx.externalPush);
 
@@ -119,13 +127,21 @@ namespace HSM {
             UpdateVisualPosition();
         }
 
-
+        private Vector3 AdjustVelocityToSlope(Vector3 velocity)
+        {
+            Quaternion slopeRotation = Quaternion.FromToRotation(Vector3.up, ctx.groundHit.normal);
+            
+            // Multiply the rotation by our movement velocity
+            Vector3 adjustedVelocity = slopeRotation * velocity;
+            
+            return adjustedVelocity;
+        }
         // Misc /////////////////////////////////////////////////////////////////////////////////////////////////////////////
         void OnDrawGizmosSelected() {
             if (!drawGizmos || groundCheck == null) return;
 
             Gizmos.color = Color.white;
-            Gizmos.DrawWireSphere(groundCheck.position, groundRadius);
+            Gizmos.DrawWireSphere(groundCheck.position, ctx.groundCheckLength);
         }
 
         static string StatePath(State s) {
@@ -364,21 +380,25 @@ namespace HSM {
         public float drag = 1;
 
         public float cyoteTime = .3f;
+        
+        
 
         [Header("State Modifiers")]
         public float sprintMod = 2;
         public float crouchMod = .5f;
-        [Tooltip("After letting off the sprint button wait till this percentage of sprint mod is up until sliding is not the effect of crouching"),Range(0,1)]
-        public float slideThreshold = .8f;
-        public float slopeSlideInfluence=.5f;
-
+        public float groundCheckLength = .5f;
+        public RaycastHit groundHit;
 
         [Header("Jump Modifiers")]
         public float jumpForce = 7f;
         public float slideJumpMod = 1.3f; // mutiply horizontal force
         public float crouchJumpMod = 1.2f; // multiply vertical force
-         
 
+        [Header("Sliding")]
+        [Tooltip("After letting off the sprint button wait till this percentage of sprint mod is up until sliding is not the effect of crouching"),Range(0,1)]
+        public float slideThreshold = .8f;
+        public float slopeSlideInfluence=.5f;
+        public float slopeMapping=1;
 
         [Header("Wall State Modifiers")]
         public float wallRayDistance;
