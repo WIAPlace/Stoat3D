@@ -60,10 +60,8 @@ public class Slide : State
 
     protected override void OnEnter()
     {
-        if(ctx.sprinting && ctx.crouching)
-        {
-            ctx.currentMoveSpeed = 0;
-        }
+        ctx.currentMoveSpeed = 0;
+        
         ctx.simpleJump = false;
     }
     protected override void OnExit()

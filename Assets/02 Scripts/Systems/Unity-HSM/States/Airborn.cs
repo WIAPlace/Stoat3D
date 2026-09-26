@@ -7,6 +7,7 @@ namespace HSM {
         public readonly State Jump;
         public readonly State Fall; 
 
+
         public Airborne(StateMachine m, State parent, PlayerContext ctx) : base(m, parent) {
             this.ctx = ctx;
 
@@ -21,6 +22,10 @@ namespace HSM {
 
         protected override State GetTransition()
         {
+            if(ctx.crouching && ctx.grounded)
+            {
+                return ((PlayerRoot)Parent).Grounded.Move.Slide;
+            }
             if (ctx.grounded)
             {
                 return ((PlayerRoot)Parent).Grounded;
@@ -29,7 +34,7 @@ namespace HSM {
             {
                 return ((PlayerRoot)Parent).LedgeGrab;
             }
-            if (ctx.walled)
+            if (ctx.walled )
             {
                 return ((PlayerRoot)Parent).Walled;
             }
@@ -38,6 +43,7 @@ namespace HSM {
 
         protected override void OnEnter() {
             //Debug.Log(ctx.velocity);
+
         }
         protected override void OnUpdate(float deltaTime)
         {

@@ -22,6 +22,6 @@ public class WallSlide : State
 
     protected override void OnUpdate(float deltaTime)
     {
-        base.OnUpdate(deltaTime);
+        
     }
 }

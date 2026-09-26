@@ -344,6 +344,9 @@ namespace HSM {
     // Player Context //////////////////////////////////////////////////////////////////////////////////////////////////////////
     [Serializable]
     public class PlayerContext {
+        public string debugCurrentLeaf;
+        public float currentVelocityMag;
+
         [Header("Game Variables")]
         public Vector3 move;
         public Vector3 velocity;
@@ -383,6 +386,7 @@ namespace HSM {
         public float wallSnapLength = .7f;
         public float wallJumpForceMod;
         public float wallJumpAngle = 45f;
+        public float wallFallSpeed=.1f;
         [Range(.0001f,2)]public float wallJumpMoveEffect;
         //[HideInInspector] public Vector3 rayDirection;
         public RaycastHit wallHit;
@@ -435,11 +439,11 @@ namespace HSM {
         private CancellationTokenSource _cts = new CancellationTokenSource();
         
         [Header("Debug")]
-        public float currentVelocityMag;
-        public State currentLeaf;
-        public string debugCurrentLeaf;
         public Vector3 debugCurrentDir;
         public float debugDot;
+        public State currentLeaf;
+        
+        
         
 
         public void TurnToForward(float tickTime)

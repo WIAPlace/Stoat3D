@@ -49,6 +49,8 @@ public class Walled : State
         // Assign the calculated local x and z components back to ctx.velocity
         //ctx.velocity = new Vector3(localVelocity.x, 0 , localVelocity.z);
         ctx.velocity = localVelocity;
+
+        ctx.walled = false;
     }
     
     protected override void OnUpdate(float deltaTime)

@@ -1,4 +1,6 @@
 using HSM;
+using Unity.Cinemachine;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class WallRun : State
@@ -6,13 +8,12 @@ public class WallRun : State
     readonly PlayerContext ctx;
 
     private float initialVelocity;
-    private float timer=0;
     public float checkIntervals = 1f;
     public float tolerance = .1f;
-    private bool stuck=false;
     public Vector3 playerForward;
     private bool jumpPressed = false;
     private float jumpSuppresed = 0;
+    private float gravity;
 
 
     public WallRun(StateMachine m, State parent, PlayerContext ctx) : base(m, parent) {
@@ -25,10 +26,7 @@ public class WallRun : State
         {
             return ((Walled)Parent).WallJump;
         }
-        if (stuck)
-        {
-            return ((Walled)Parent).WallSlide;
-        }
+        
         return base.GetTransition();
     }
     
@@ -38,30 +36,32 @@ public class WallRun : State
         ctx.lastPosition = ctx.body.transform.position;
 
         playerForward = ctx.visualBody.transform.forward.normalized;
-        stuck=false;
         jumpPressed = false;
         jumpSuppresed = 0;
+        gravity = 0;
+
+        
+
     }
 
     protected override void OnUpdate(float deltaTime)
     {
-        ctx.currentMoveSpeed = initialVelocity;
-
-        // Stuck Timer 
-        timer+=deltaTime;
-        if (timer >= checkIntervals)
+        float desiredSpeed;
+        if(Mathf.Abs(ctx.move.x)>0.01f || Mathf.Abs(ctx.move.z)>0.01f)
         {
-            float distanceMoved = Vector3.Distance(ctx.body.transform.position, ctx.lastPosition);
-            if (distanceMoved < tolerance)
-            {
-                // The object has barely moved – it is stuck!
-                //Debug.Log("Object is stuck!");
-                stuck=true;
-            }
-            ctx.lastPosition = ctx.body.transform.position;
-            timer = 0;
+            desiredSpeed = initialVelocity;
+        }
+        else
+        {
+            desiredSpeed = 0;
         }
 
+        if (gravity < ctx.gravForce)
+        {
+            gravity-=ctx.wallFallSpeed*deltaTime;
+        }
+
+        // find the surface tangent
         RaycastHit hit = ctx.wallHit;
         Vector3 surfaceTangent = Vector3.ProjectOnPlane(playerForward,hit.normal).normalized;
         surfaceTangent.y = 0;
@@ -71,12 +71,23 @@ public class WallRun : State
     
         ctx.body.transform.forward = surfaceTangent; // turn body to face forward along the walls rotation
 
-        ctx.velocity = surfaceTangent * ctx.currentMoveSpeed;
 
-        if (ctx.jumpPressed)
+        // rate of change based off of if you are moving forward fast enough
+        float rateOfChange;
+        if(desiredSpeed >= initialVelocity)rateOfChange = ctx.accel;
+        else rateOfChange = ctx.decel;
+        
+        ctx.currentMoveSpeed = Mathf.MoveTowards(ctx.currentMoveSpeed,desiredSpeed,rateOfChange*deltaTime);
+        // the desired velocity at this current velocity
+        ctx.velocity = surfaceTangent * ctx.currentMoveSpeed;
+        ctx.velocity.y = gravity;
+
+
+        // hold gate for jump pressed;
+        if (ctx.jumpPressed && !jumpPressed)
         {
             jumpPressed = true;
         }
-        jumpSuppresed += deltaTime;
+        if(jumpSuppresed<.2f)jumpSuppresed += deltaTime;
     }
 }
