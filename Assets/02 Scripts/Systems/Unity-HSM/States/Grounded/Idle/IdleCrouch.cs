@@ -25,10 +25,12 @@ public class IdleCrouch : State
         if(ctx.crouching)
         {
             ctx.simpleJump = false;
+            ctx.HalfHeight();
         }
     }
     protected override void OnExit()
     {
         ctx.simpleJump = true;
+        if(!ctx.crouching)ctx.FullHight();
     }
 }

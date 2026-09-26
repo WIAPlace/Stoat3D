@@ -17,6 +17,7 @@ namespace HSM {
         public Transform groundCheck;
         public LayerMask groundMask;
         public LayerMask wallMask;
+        public LayerMask CollectibleMask;
         public bool drawGizmos = true;
         string lastPath;
         float cyoteTimer=0;
@@ -127,6 +128,19 @@ namespace HSM {
             UpdateVisualPosition();
         }
 
+        // Triggers /////////////////////////////////////////////////////////////////////////////////////////////////////////
+        public void OnTriggerZoneEnter(Collider other)
+        {
+            if ((CollectibleMask.value & (1 << other.gameObject.layer)) != 0)
+            {
+                Debug.Log("Collected");
+
+                // Destroy the object so it disappears from the scene
+                Destroy(other.gameObject);
+            }
+        }
+
+        // Slope ////////////////////////////////////////////////////////////////////////////////////////////////////////////
         private Vector3 AdjustVelocityToSlope(Vector3 velocity)
         {
             Quaternion slopeRotation = Quaternion.FromToRotation(Vector3.up, ctx.groundHit.normal);
@@ -136,21 +150,13 @@ namespace HSM {
             
             return adjustedVelocity;
         }
+        
         // Misc /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        void OnDrawGizmosSelected() {
-            if (!drawGizmos || groundCheck == null) return;
-
-            Gizmos.color = Color.white;
-            Gizmos.DrawWireSphere(groundCheck.position, ctx.groundCheckLength);
-        }
-
         static string StatePath(State s) {
             return string.Join(" > ", s.PathToRoot().Reverse().Select(n => n.GetType().Name));
         }
 
-        // Weird start up stuff ///////////////////////////////////////////////////////////////////////////////////////////////
-
-
+        // Visual Functions /////////////////////////////////////////////////////////////////////////////////////////////////
         private void UpdateVisualPosition() // keep visuals in line with the body
         {
 
@@ -160,6 +166,7 @@ namespace HSM {
             //ctx.cameraPosition.position = ctx.body.transform.position;
         }
 
+        // Checkers //////////////////////////////////////////////////////////////////////////////////////////////////////////
         private void CheckForWallRun()
         {
             // start by assuming we arnt touching a wall.
@@ -279,10 +286,15 @@ namespace HSM {
             
             if(ctx.currentVelocityMag > .01f) Gizmos.DrawLine(ctx.body.transform.position, ctx.body.transform.position + ctx.debugCurrentDir*2);
         }
+        void OnDrawGizmosSelected() {
+            if (!drawGizmos || groundCheck == null) return;
+
+            Gizmos.color = Color.white;
+            Gizmos.DrawWireSphere(groundCheck.position, ctx.groundCheckLength);
+        }
 
 
         // Events /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
         private void SetUpEvents()
         {
             input.MoveEvent += HandleMove;
@@ -375,11 +387,14 @@ namespace HSM {
         public float decel = 50f;
         public float slideDecel = 10f;
 
+        public float health=6;
         
         public float gravForce = 9.81f;
         public float drag = 1;
 
         public float cyoteTime = .3f;
+
+        
         
         
 
@@ -525,6 +540,16 @@ namespace HSM {
            await Awaitable.WaitForSecondsAsync(1.0f, token);
            lastLedge = null;
         }
-    
+
+        public void HalfHeight()
+        {
+            controller.height = 1;
+            controller.center = new Vector3(0,-.5f,0);
+        }
+        public void FullHight()
+        {
+            controller.height = 2;
+            controller.center = new Vector3(0,0,0);
+        }
     }
 }

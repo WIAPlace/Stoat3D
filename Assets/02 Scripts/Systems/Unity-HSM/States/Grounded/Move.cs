@@ -28,10 +28,6 @@ namespace HSM {
             
             return Mathf.Abs(ctx.move.magnitude) <= 0.01f ? ((Grounded)Parent).Idle : null;
         }
-        protected override void OnExit()
-        {
-            //ctx.velocity.y = 0;
-        }
 
         protected override void OnUpdate(float deltaTime)
         {
@@ -53,13 +49,8 @@ namespace HSM {
             targetx = Mathf.MoveTowards(ctx.velocity.x, targetx, rateOfChange*deltaTime);
             targetz = Mathf.MoveTowards(ctx.velocity.z, targetz, rateOfChange*deltaTime);
 
-            //targetx = Mathf.Max(targetx,0);
-            //targetz = Mathf.Max(targetz,0);
-
             ctx.velocity.x = targetx;
             ctx.velocity.z = targetz;
-
-            //ctx.velocity.y = -ctx.controller.slopeLimit/Time.deltaTime;
 
             // turn visual player to forward
             ctx.TurnToForward(deltaTime);

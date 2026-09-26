@@ -49,11 +49,13 @@ public class MovingCrouch : State
         {
             ctx.currentMoveSpeed = ctx.moveSpeed * ctx.crouchMod;
             ctx.simpleJump = false;
+            ctx.HalfHeight();
         }
     }
     protected override void OnExit()
     {
         ctx.simpleJump = true;
+        if(!ctx.crouching)ctx.FullHight();
     }
 
 

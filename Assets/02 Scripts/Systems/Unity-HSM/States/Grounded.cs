@@ -32,6 +32,10 @@ namespace HSM {
         {
             ctx.simpleJump = true; // make sure this is true by default in case it some how got left off;
         }
+        protected override void OnExit()
+        {
+            ctx.FullHight();
+        }
 
         // On Update Occurs from the bottom of the tree to the top
         protected override void OnUpdate(float deltaTime)
@@ -42,11 +46,6 @@ namespace HSM {
             }
             //Debug.Log("Move");
             ctx.velocity.y += -ctx.gravForce * deltaTime; // apply gravity
-
-            // Match the player body's Y rotation to the camera target's Y rotation
-            // Maybe change this to be changing a value rather than changing it directly in the state itself.
-            //Vector3 targetRotation = new Vector3(0, ctx.cinCamTransform.eulerAngles.y, 0);
-            //ctx.controller.transform.rotation = Quaternion.Euler(targetRotation);
         }
     }
 }

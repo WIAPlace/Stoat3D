@@ -55,10 +55,12 @@ public class Slide : State
         ctx.currentMoveSpeed = 0;
         
         ctx.simpleJump = false;
+        ctx.HalfHeight();
     }
     protected override void OnExit()
     {
         ctx.simpleJump = true;
+        if(!ctx.crouching)ctx.FullHight();
     }
     protected override void OnUpdate(float deltaTime)
     {
