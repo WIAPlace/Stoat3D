@@ -119,6 +119,7 @@ namespace HSM {
             UpdateVisualPosition();
         }
 
+
         // Misc /////////////////////////////////////////////////////////////////////////////////////////////////////////////
         void OnDrawGizmosSelected() {
             if (!drawGizmos || groundCheck == null) return;
@@ -364,12 +365,12 @@ namespace HSM {
 
         public float cyoteTime = .3f;
 
-
         [Header("State Modifiers")]
         public float sprintMod = 2;
         public float crouchMod = .5f;
         [Tooltip("After letting off the sprint button wait till this percentage of sprint mod is up until sliding is not the effect of crouching"),Range(0,1)]
         public float slideThreshold = .8f;
+        public float slopeSlideInfluence=.5f;
 
 
         [Header("Jump Modifiers")]
