@@ -6,6 +6,8 @@ namespace HSM {
         readonly PlayerContext ctx;
         public readonly State Jump;
         public readonly State Fall; 
+        
+        
 
 
         public Airborne(StateMachine m, State parent, PlayerContext ctx) : base(m, parent) {
@@ -43,7 +45,13 @@ namespace HSM {
 
         protected override void OnEnter() {
             //Debug.Log(ctx.velocity);
-
+            ctx.useInitialForward = true;
+            ctx.forwardDir = ctx.body.transform.forward;
+            ctx.rightDir = ctx.body.transform.right;
+        }
+        protected override void OnExit()
+        {
+            ctx.useInitialForward = false;
         }
         protected override void OnUpdate(float deltaTime)
         {
@@ -53,6 +61,7 @@ namespace HSM {
                 ctx.velocity.y = 0;
             }
             //Debug.Log("grav");
+           
             ctx.velocity.y += -ctx.gravForce * deltaTime; // apply gravity
 
             
@@ -67,6 +76,11 @@ namespace HSM {
             {
                 ctx.velocity.z = 0;
             }
+
+            // turn visual player to forward
+            //ctx.TurnToForward(deltaTime);
+            ctx.TurnMechanicalBodyForward(deltaTime);
+            ctx.TurnVisualBodyToMoveForward(deltaTime);
         }
     }
 }

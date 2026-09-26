@@ -51,7 +51,6 @@ public class Slide : State
 
     protected override void OnEnter()
     {
-        
         ctx.currentMoveSpeed = 0;
         
         ctx.simpleJump = false;

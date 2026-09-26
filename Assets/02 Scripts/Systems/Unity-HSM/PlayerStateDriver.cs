@@ -99,14 +99,14 @@ namespace HSM {
             gravVel = ctx.velocity.y; // maintain gravity
             Vector3 horizontalVel;
 
-            if(!ctx.walled && !ctx.ledgeGrabbed){
+            if(!ctx.walled && !ctx.ledgeGrabbed && ctx.grounded){
                 // Move in the direction of the controller.
                 horizontalVel = (body.transform.right * ctx.velocity.x) + (body.transform.forward * ctx.velocity.z);
-                if (ctx.grounded)
-                {
-                    horizontalVel = AdjustVelocityToSlope(horizontalVel);
-                    //horizontalVel *= ctx.moveSpeed;
-                }
+                horizontalVel = AdjustVelocityToSlope(horizontalVel);
+            }
+            else if(ctx.useInitialForward)
+            {
+                horizontalVel = (ctx.rightDir*ctx.velocity.x)+(ctx.forwardDir*ctx.velocity.z);
             }
             else
             {
@@ -394,10 +394,6 @@ namespace HSM {
 
         public float cyoteTime = .3f;
 
-        
-        
-        
-
         [Header("State Modifiers")]
         public float sprintMod = 2;
         public float crouchMod = .5f;
@@ -449,6 +445,7 @@ namespace HSM {
         [Header("Bools")]
         public bool jumpPressed;
         public bool simpleJump; // used for if the basic jump can be used in grounded state
+        public bool useInitialForward;
         public bool grounded;
         public bool walled;
         public bool ledgeGrabbed;
@@ -472,6 +469,8 @@ namespace HSM {
         [HideInInspector] public Vector3 lastPosition;
         [HideInInspector] public Vector3 lastHitNormal;
         [HideInInspector] public Vector3 externalPush;
+        [HideInInspector] public Vector3 forwardDir;
+        [HideInInspector] public Vector3 rightDir;
         private CancellationTokenSource _cts = new CancellationTokenSource();
         
         [Header("Debug")]
@@ -507,6 +506,21 @@ namespace HSM {
         {
             /// get the movment direction from the normals of the players velocity
             Vector3 targetVisualDir = velocity.normalized;
+            targetVisualDir = (cinCamTransform.forward * targetVisualDir.z) + (cinCamTransform.right * targetVisualDir.x);
+            targetVisualDir.y = 0;
+
+            if(targetVisualDir.magnitude > .01f){
+                // Create the target rotation looking in that direction
+                Quaternion targetVisualRot = Quaternion.LookRotation(targetVisualDir);
+
+                // Smoothly rotate toward the target rotation
+                visualBody.transform.rotation = Quaternion.Slerp(visualBody.transform.rotation, targetVisualRot, turnSpeed * tickTime);
+            }  
+        }
+        public void TurnVisualBodyToMoveForward(float tickTime)
+        {
+            /// get the movment direction from the normals of the players velocity
+            Vector3 targetVisualDir = move.normalized;
             targetVisualDir = (cinCamTransform.forward * targetVisualDir.z) + (cinCamTransform.right * targetVisualDir.x);
             targetVisualDir.y = 0;
 
