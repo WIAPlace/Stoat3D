@@ -265,13 +265,13 @@ namespace HSM {
         {
             if(ctx.grounded || ctx.walled || ctx.ledgeGrabbed) return;
             
-            bool ledgeDetected = Physics.SphereCast(ctx.visualBody.transform.position, ctx.ledgeSphereRadius,ctx.visualBody.transform.forward, out ctx.ledgeHit,ctx.ledgeDetectionLength,ctx.ledgeMask);
+            bool ledgeDetected = Physics.SphereCast(ctx.body.transform.position, ctx.ledgeSphereRadius,ctx.visualBody.transform.forward, out ctx.ledgeHit,ctx.ledgeDetectionLength,ctx.ledgeMask);
 
             if(!ledgeDetected) return;
 
-            float distanceToLedge = Vector3.Distance(ctx.visualBody.transform.position,ctx.ledgeHit.transform.position);
+            float distanceToLedge = Vector3.Distance(ctx.visualBody.transform.position,ctx.ledgeHit.point);
             ctx.currLedge = ctx.ledgeHit.transform;
-
+           
             if(distanceToLedge < ctx.maxLedgeGrabDistance && ctx.currLedge != ctx.lastLedge) {
                 ctx.ledgeGrabbed = true;
             } 

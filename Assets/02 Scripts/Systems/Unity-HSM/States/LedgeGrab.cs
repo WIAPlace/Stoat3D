@@ -57,8 +57,8 @@ public class LedgeGrab : State {
 
     protected override void OnUpdate(float deltaTime)
     {
-        Vector3 directionToLedge = ctx.currLedge.position - ctx.body.transform.position;
-        float ledgeDist = Vector3.Distance(ctx.body.transform.position, ctx.currLedge.position);
+        Vector3 directionToLedge = ctx.ledgeHit.point - ctx.body.transform.position;
+        float ledgeDist = Vector3.Distance(ctx.body.transform.position, ctx.ledgeHit.point);
 
         if (ledgeDist > 1f)
         {   
