@@ -3892,8 +3892,9 @@ GameObject:
   - component: {fileID: 1604040851}
   - component: {fileID: 1604040850}
   - component: {fileID: 1604040849}
+  - component: {fileID: 1604040853}
   m_Layer: 0
-  m_Name: Sphere
+  m_Name: TriggerZoneTest
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4019,6 +4020,23 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1604040846}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1604040853
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1604040846}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3de5c6cc05ede124690d81226989f663, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OnZoneEnterAlertEnemy
+  agents:
+  - {fileID: 304287405}
+  playerMask:
+    serializedVersion: 2
+    m_Bits: 512
 --- !u!1 &1622054395
 GameObject:
   m_ObjectHideFlags: 0

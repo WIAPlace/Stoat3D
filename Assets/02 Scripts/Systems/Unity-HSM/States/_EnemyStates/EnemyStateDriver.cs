@@ -8,7 +8,7 @@ using HSM;
 using UnityEngine.AI;
 
 // State machine driver for basic enemys caus behavior systems is annoying
-public class EnemyStateDriver : MonoBehaviour
+public class EnemyStateDriver : MonoBehaviour, IHitAble
 {
     public EnemyContext ctx = new EnemyContext();
     StateMachine machine;
@@ -41,7 +41,7 @@ public class EnemyStateDriver : MonoBehaviour
 
     public void OnZoneTriggered(bool context)
     {
-        
+        ctx.inZone = context;
     }
 
     // Misc /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -56,6 +56,11 @@ public class EnemyStateDriver : MonoBehaviour
             Gizmos.color = Color.cyan;
             Gizmos.DrawWireSphere(ctx.WanderZone.position, ctx.WanderRadius);
         }
+    }
+
+    public void OnHit(Vector3 hitFrom, float force, float damage)
+    {
+        // hit from is where the player is, force is how much force will be applided and damage is damage.
     }
 }
 

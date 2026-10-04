@@ -1,18 +1,18 @@
 using UnityEngine;
 using Unity.Behavior;
 
-public class OnZoneEnterAlertBehaviors : MonoBehaviour
+public class OnZoneEnterAlertEnemy : MonoBehaviour
 {
-    [SerializeField]private BehaviorGraphAgent[] agents;
+    [SerializeField]private EnemyStateDriver[] agents;
     [SerializeField] private LayerMask playerMask;
 
     void OnTriggerEnter(Collider other)
     {
         if ((playerMask.value & (1 << other.gameObject.layer)) != 0)
         {
-            foreach(BehaviorGraphAgent agent in agents)
+            foreach(EnemyStateDriver agent in agents)
             {
-                agent.SetVariableValue("EnteredZone",true);
+                agent.OnZoneTriggered(true);
             }
         }
     }
@@ -21,9 +21,9 @@ public class OnZoneEnterAlertBehaviors : MonoBehaviour
     {
         if ((playerMask.value & (1 << other.gameObject.layer)) != 0)
         {
-               foreach(BehaviorGraphAgent agent in agents)
+               foreach(EnemyStateDriver agent in agents)
             {
-                agent.SetVariableValue("EnteredZone",false);
+                agent.OnZoneTriggered(false);
             } 
         }
     }
