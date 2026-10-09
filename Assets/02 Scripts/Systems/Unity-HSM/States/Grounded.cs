@@ -34,6 +34,10 @@ namespace HSM {
         }
         protected override void OnExit()
         {
+            ctx.activePlatform = null;
+            ctx.tempWorldMovment = ctx.worldMovement;
+            ctx.worldMovement = Vector3.zero;
+
             ctx.FullHight();
         }
 
@@ -46,6 +50,38 @@ namespace HSM {
             }
             //Debug.Log("Move");
             ctx.velocity.y += -ctx.gravForce * deltaTime; // apply gravity
+
+            HandleMovingPlatform();
+        }
+
+        void HandleMovingPlatform()
+        {
+            if(ctx.groundHit.collider != null && ctx.groundHit.collider.CompareTag(ctx.moveingPlatTag))
+            {
+                Transform currentPlatform = ctx.groundHit.transform;
+                //Debug.Log("first if passed");
+                if (currentPlatform == ctx.activePlatform)
+                {
+                    // Calculate how much the platform moved since the last frame
+                    ctx.worldMovement = currentPlatform.position - ctx.platformLastPosition;
+                    //Debug.Log("On Existing Plat");
+                }
+                else
+                {
+                    // Player just stepped onto a new platform
+                    ctx.activePlatform = currentPlatform;
+                    ctx.worldMovement = Vector3.zero;
+                    //Debug.Log("On new Plat");
+                }
+
+                // Update the position record for the next frame
+                ctx.platformLastPosition = currentPlatform.position;
+                return;
+            }
+            // If we are not on a moving platform, clear variables
+            ctx.activePlatform = null;
+            ctx.worldMovement = Vector3.zero;
+            //Debug.Log("Failed");
         }
     }
 }

@@ -27,6 +27,8 @@ namespace HSM {
         StateMachine machine;
         State root;
 
+
+
         
 
         // Awake //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -95,7 +97,7 @@ namespace HSM {
                 //Debug.Log("State"+ path);
                 lastPath = path;
             }
-
+            
             gravVel = ctx.velocity.y; // maintain gravity
             Vector3 horizontalVel;
 
@@ -117,6 +119,7 @@ namespace HSM {
             //Vector3 tempVel = new Vector3(horizontalVel.x,gravVel,horizontalVel.z);
             Vector3 tempVel = horizontalVel + gravVector;
 
+            
             controller.Move((tempVel * Time.deltaTime) + ctx.externalPush);
 
             // Debug
@@ -125,6 +128,7 @@ namespace HSM {
         }
         void LateUpdate()
         {
+            controller.Move(ctx.worldMovement);
             UpdateVisualPosition();
         }
 
@@ -378,7 +382,8 @@ namespace HSM {
 
         [Header("Game Variables")]
         public Vector3 move;
-        public Vector3 velocity;
+        public Vector3 velocity; // based off of player's transform
+        public Vector3 momentum;  
 
         public float moveSpeed = 6f;
         public float currentMoveSpeed = 0f;
@@ -436,6 +441,13 @@ namespace HSM {
         public float maxLedgeGrabDistance;
         public float horizontalLedgeJumpForce;
         public float verticalLedgeJumpMod;
+
+        [Header("World Movement")]
+        public string moveingPlatTag="MovingPlat";
+        [HideInInspector]public Transform activePlatform;
+        public Vector3 worldMovement;
+        [HideInInspector]public Vector3 tempWorldMovment;
+        [HideInInspector]public Vector3 platformLastPosition;
 
         [Header("Visual Variables")]
         [Tooltip("Speed the visual gameobject turns")]public float turnSpeed = 5;
