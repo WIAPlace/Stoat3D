@@ -216,7 +216,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PingPongMoveTransform
   moveSpeed: 10
-  length: 30
+  length: 80
 --- !u!65 &29350457
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -4328,6 +4328,7 @@ MonoBehaviour:
     currentVelocityMag: 0
     move: {x: 0, y: 0, z: 0}
     velocity: {x: 0, y: 0, z: 0}
+    momentum: {x: 0, y: 0, z: 0}
     moveSpeed: 18
     currentMoveSpeed: 0
     accel: 40

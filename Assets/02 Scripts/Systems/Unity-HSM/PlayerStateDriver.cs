@@ -101,16 +101,16 @@ namespace HSM {
             gravVel = ctx.velocity.y; // maintain gravity
             Vector3 horizontalVel;
 
-            if(!ctx.walled && !ctx.ledgeGrabbed && ctx.grounded){
+            if(!ctx.walled && !ctx.ledgeGrabbed && ctx.grounded){ // grounded
                 // Move in the direction of the controller.
                 horizontalVel = (body.transform.right * ctx.velocity.x) + (body.transform.forward * ctx.velocity.z);
                 horizontalVel = AdjustVelocityToSlope(horizontalVel);
             }
-            else if(ctx.useInitialForward)
+            else if(ctx.useInitialForward) // jumping / airborn
             {
                 horizontalVel = (ctx.rightDir*ctx.velocity.x)+(ctx.forwardDir*ctx.velocity.z);
             }
-            else
+            else // wall and ledge*
             {
                 //horizontalVel = (body.transform.right * ctx.velocity.x) + (body.transform.forward * ctx.velocity.z);
                 horizontalVel = ctx.velocity;

@@ -46,15 +46,16 @@ namespace HSM {
         protected override void OnEnter() {
             
             // Store your target world-space velocity 
-            Vector3 targetWorldVelocity = ctx.tempWorldMovment/Time.deltaTime;
-            ctx.tempWorldMovment = Vector3.zero;
-            // Convert the world vector back into the body's local space
-            Vector3 localVelocity = ctx.body.transform.InverseTransformDirection(targetWorldVelocity);
-
-            // Assign the calculated local x and z components back to ctx.velocity
-            //ctx.velocity = new Vector3(localVelocity.x, 0 , localVelocity.z);
-            ctx.velocity += localVelocity;
-            
+            if(ctx.tempWorldMovment.magnitude > 0){
+                Vector3 targetWorldVelocity = ctx.tempWorldMovment/Time.deltaTime;
+                ctx.tempWorldMovment = Vector3.zero;
+                // Convert the world vector back into the body's local space
+                Vector3 localVelocity = ctx.body.transform.InverseTransformDirection(targetWorldVelocity);
+                
+                // Assign the calculated local x and z components back to ctx.velocity
+                //ctx.velocity = new Vector3(localVelocity.x, 0 , localVelocity.z);
+                ctx.velocity += localVelocity;
+            }
 
 
             ctx.useInitialForward = true;
