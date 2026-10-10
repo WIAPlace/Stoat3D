@@ -7,6 +7,8 @@ using Unity.Cinemachine;
 using System.Collections;
 using System.Threading.Tasks;
 using System.Threading;
+using JetBrains.Annotations;
+using UnityEditor.EditorTools;
 //using UnityUtils;
 
 namespace HSM {
@@ -23,11 +25,12 @@ namespace HSM {
         float cyoteTimer=0;
         float gravVel;
 
+        float chainTimer=0;
+        bool coolDownOn;
+
         CharacterController controller;
         StateMachine machine;
         State root;
-
-
 
         
 
@@ -78,6 +81,7 @@ namespace HSM {
         // Update //////////////////////////////////////////////////////////////////////////////////////////////////////////
         void Update() {
             ctx.externalPush = Vector3.zero;
+            AttackUpdate();
 
             ctx.grounded = Physics.CheckSphere(groundCheck.position, ctx.groundCheckLength, groundMask);
             if(ctx.grounded) Physics.Raycast(groundCheck.position,Vector3.down,out ctx.groundHit,ctx.groundCheckLength, groundMask);
@@ -160,7 +164,49 @@ namespace HSM {
             return string.Join(" > ", s.PathToRoot().Reverse().Select(n => n.GetType().Name));
         }
 
-        // Visual Functions /////////////////////////////////////////////////////////////////////////////////////////////////
+        // called in update to facitate attack's cooldowns.
+        private void AttackUpdate()
+        {
+            // Reset combo if player waits too long
+            if (Time.time - ctx.lastClickTime > ctx.chainWindow && ctx.chainStep > 0)
+            {
+                ResetCombo();
+            }
+
+            if(coolDownOn){
+                chainTimer += Time.deltaTime;
+                if (chainTimer >= ctx.chainCooldown)
+                {
+                    chainTimer = 0;
+                    coolDownOn = false;
+                }
+            }
+        }
+
+        // Call this via an Animation Event at the end of an idle transition
+        public void ResetCombo()
+        {
+            ctx.chainStep = 0;
+            //anim.SetInteger("ChainStep", 0);
+        }
+       
+        void LogAttackInput()
+        {
+            ctx.lastClickTime = Time.time;
+            ctx.chainStep++;
+
+            if (ctx.chainStep > ctx.chainAmt) 
+            {
+                coolDownOn = true;
+                ctx.chainStep = 0; // Loop back or cap it
+                return;
+            }
+
+            //anim.SetInteger("ChainStep", ctx.chainStep);
+            //anim.SetTrigger("AttackTrigger");
+            ctx.attacking=true; 
+        }
+            // Visual Functions /////////////////////////////////////////////////////////////////////////////////////////////////
         private void UpdateVisualPosition() // keep visuals in line with the body
         {
 
@@ -282,7 +328,6 @@ namespace HSM {
         }
 
 
-
         // Gizmos /////////////////////////////////////////////////////////////////////////////////////////////////////////////
         private void OnDrawGizmos()
         {
@@ -291,10 +336,16 @@ namespace HSM {
             if(ctx.currentVelocityMag > .01f) Gizmos.DrawLine(ctx.body.transform.position, ctx.body.transform.position + ctx.debugCurrentDir*2);
         }
         void OnDrawGizmosSelected() {
-            if (!drawGizmos || groundCheck == null) return;
+            if (!drawGizmos) return;
 
-            Gizmos.color = Color.white;
-            Gizmos.DrawWireSphere(groundCheck.position, ctx.groundCheckLength);
+            if(groundCheck!=null){
+                Gizmos.color = Color.white;
+                Gizmos.DrawWireSphere(groundCheck.position, ctx.groundCheckLength);
+            }
+            if (ctx.attacking && ctx.attackPoint != null)
+            {
+                Gizmos.DrawWireSphere(ctx.attackPoint.position,ctx.atkRange);
+            }
         }
 
 
@@ -308,6 +359,8 @@ namespace HSM {
             input.SprintCancelledEvent += SprintEventCancelled;
             input.CrouchEvent += CrouchEvent;
             input.CrouchCancelledEvent += CrouchEventCancelled;
+            input.AttackEvent += AttackEvent;
+            input.AttackCancelledEvent += AttackEventCancelled;
         }
         private void EndEvents()
         {
@@ -372,6 +425,17 @@ namespace HSM {
             }
         }
         
+        private void AttackEvent()
+        {
+            if(!coolDownOn)
+            {
+                LogAttackInput();
+            }
+        }
+        private void AttackEventCancelled()
+        {
+            ctx.attacking=false;
+        }
     }
 
     // Player Context //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -442,6 +506,18 @@ namespace HSM {
         public float horizontalLedgeJumpForce;
         public float verticalLedgeJumpMod;
 
+        [Header("Attacks")]
+        public float atkdamage;
+        public float atkRange;
+        [Tooltip("How much an enemy will be pushed by and attack")]public float atkForce;
+        public float chainAmt;
+        [Tooltip("Time before attack goes off")] public float attackTime; // time before attack
+        [Tooltip("Time after an attack goes off")] public float coolDown; // time after attack
+        [HideInInspector] public float lastClickTime;
+        [Tooltip("Window of time for attacks to count as chain attacks")]public float chainWindow = 1f;
+        [Tooltip("Cooldown after you have completed a chain attack")]public float chainCooldown; 
+        [HideInInspector] public int chainStep=0;
+
         [Header("World Movement")]
         public string moveingPlatTag="MovingPlat";
         [HideInInspector]public Transform activePlatform;
@@ -465,6 +541,7 @@ namespace HSM {
         public bool crouching;
         public bool wallLeft;
         public bool wallRight;
+        public bool attacking;
         
         
         
@@ -478,6 +555,8 @@ namespace HSM {
         public Animator anim;
         //public Rigidbody rb;
         public Renderer renderer;
+        public Transform attackPoint;
+        public LayerMask attackLayer;
         [HideInInspector] public Vector3 lastPosition;
         [HideInInspector] public Vector3 lastHitNormal;
         [HideInInspector] public Vector3 externalPush;

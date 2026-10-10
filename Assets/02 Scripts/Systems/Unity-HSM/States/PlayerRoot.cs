@@ -6,6 +6,7 @@ namespace HSM {
         public readonly Airborne Airborne;
         public readonly Walled Walled;
         public readonly LedgeGrab LedgeGrab;
+        public readonly Attack Attack;
         readonly PlayerContext ctx;
 
         public PlayerRoot(StateMachine m, PlayerContext ctx) : base(m, null) {
@@ -14,6 +15,7 @@ namespace HSM {
             Airborne = new Airborne(m, this, ctx);
             Walled = new Walled(m, this, ctx);
             LedgeGrab = new LedgeGrab(m, this, ctx);
+            Attack = new Attack(m, this, ctx);
         }
         
         protected override State GetInitialState() => Grounded;

@@ -19,6 +19,7 @@ namespace HSM {
 
         // Get Transition Occurs from top of the states to the bottom
         protected override State GetTransition() {
+            if(ctx.attacking) return ((PlayerRoot)Parent).Attack.BasicAttack;
             if (ctx.jumpPressed && ctx.simpleJump) { // Jump
                 //ctx.jumpPressed = false;
                 ctx.velocity.y = ctx.jumpForce;

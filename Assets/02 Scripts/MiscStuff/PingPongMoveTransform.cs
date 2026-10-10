@@ -2,9 +2,11 @@ using UnityEngine;
 
 public class PingPongMoveTransform : MonoBehaviour
 {
+    public Vector3 vectorMulti;
     public float moveSpeed;
     public float length;
     private Vector3 startPosition;
+    
     float t;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -23,8 +25,9 @@ public class PingPongMoveTransform : MonoBehaviour
 
         // 3. Scale the smoothed value by your desired length
         float mod = smoothT * length;
-
         
-        transform.position = new Vector3(startPosition.x,startPosition.y,startPosition.z+mod); 
+        transform.position = new Vector3(startPosition.x + (vectorMulti.x*mod),
+                                         startPosition.y + (vectorMulti.y*mod),
+                                         startPosition.z + (vectorMulti.z*mod)); 
     }
 }

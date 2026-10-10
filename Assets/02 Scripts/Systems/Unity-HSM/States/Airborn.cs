@@ -24,6 +24,8 @@ namespace HSM {
 
         protected override State GetTransition()
         {
+            if(ctx.attacking) return ((PlayerRoot)Parent).Attack.BasicAttack;
+            
             if(ctx.crouching && ctx.grounded)
             {
                 return ((PlayerRoot)Parent).Grounded.Move.Slide;

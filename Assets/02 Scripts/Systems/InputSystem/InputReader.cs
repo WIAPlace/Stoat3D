@@ -74,6 +74,8 @@ public class InputReader : ScriptableObject, InputSystem.IPlayerActions, InputSy
     public event Action CrouchEvent;
     public event Action CrouchCancelledEvent;
     public event Action InteractEvent;
+    public event Action AttackEvent;
+    public event Action AttackCancelledEvent;
 
     ////// Player Events ///////////////
     /// 
@@ -127,6 +129,18 @@ public class InputReader : ScriptableObject, InputSystem.IPlayerActions, InputSy
         }
     }
 
+    public void OnAttack(UnityEngine.InputSystem.InputAction.CallbackContext context)
+    {
+        if (context.phase == InputActionPhase.Performed)
+        {
+            AttackEvent?.Invoke();
+        }
+        if (context.phase == InputActionPhase.Canceled)
+        {
+            AttackCancelledEvent?.Invoke();
+        }
+    }
+
     public void OnPause(InputAction.CallbackContext context) // PAUSE
     {
         if (context.phase == InputActionPhase.Performed)
@@ -161,14 +175,7 @@ public class InputReader : ScriptableObject, InputSystem.IPlayerActions, InputSy
     public void OnLook(UnityEngine.InputSystem.InputAction.CallbackContext context)
     {
         //throw new System.NotImplementedException();
-    }
-
-    public void OnAttack(UnityEngine.InputSystem.InputAction.CallbackContext context)
-    {
-        //throw new System.NotImplementedException();
-    }
-
-    
+    }   
 
     public void OnPrevious(UnityEngine.InputSystem.InputAction.CallbackContext context)
     {
