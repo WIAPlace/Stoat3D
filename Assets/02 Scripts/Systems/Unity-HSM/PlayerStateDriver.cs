@@ -510,6 +510,7 @@ namespace HSM {
         public float atkdamage;
         public float atkRange;
         [Tooltip("How much an enemy will be pushed by and attack")]public float atkForce;
+        public float vertAtkForce;
         public float chainAmt;
         [Tooltip("Time before attack goes off")] public float attackTime; // time before attack
         [Tooltip("Time after an attack goes off")] public float coolDown; // time after attack

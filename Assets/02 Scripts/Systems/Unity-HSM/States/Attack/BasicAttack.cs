@@ -47,7 +47,7 @@ public class BasicAttack : State
             foreach(Collider target in hitTargets)
             {
                 if(target.gameObject.TryGetComponent<IHitAble>(out IHitAble hitAble)) 
-                    hitAble.OnHit(ctx.visualBody.transform.position, ctx.atkForce,ctx.atkdamage);
+                    hitAble.OnHit(ctx.visualBody.transform.position, ctx.atkForce,ctx.vertAtkForce,ctx.atkdamage);
                 
             }
         }       

@@ -22,6 +22,7 @@ public class EnemyInZone : State
 
     protected override State GetTransition()
     {
+        if(ctx.isHit) return ((EnemyRoot)Parent).EnemyHit;
         if(!ctx.inZone) return ((EnemyRoot)Parent).EnemyWander;
 
         return base.GetTransition();

@@ -14,6 +14,7 @@ public class EnemyWander : State
 
     protected override State GetTransition()
     {
+        if(ctx.isHit) return ((EnemyRoot)Parent).EnemyHit;
         if(ctx.inZone) return ((EnemyRoot)Parent).EnemyInZone;
 
         return base.GetTransition();
