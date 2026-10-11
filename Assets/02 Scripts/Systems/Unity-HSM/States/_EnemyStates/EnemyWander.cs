@@ -25,7 +25,7 @@ public class EnemyWander : State
     }
     protected override void OnExit()
     {
-        ctx.Agent.ResetPath();
+        if(ctx.Agent.isActiveAndEnabled)ctx.Agent.ResetPath();
     }
 
     protected override void OnUpdate(float deltaTime)

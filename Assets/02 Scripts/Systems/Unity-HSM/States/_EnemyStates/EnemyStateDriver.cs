@@ -25,7 +25,8 @@ public class EnemyStateDriver : MonoBehaviour, IHitAble
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+        ctx.rb = GetComponent<Rigidbody>();
+        ctx.Agent = GetComponent<NavMeshAgent>();
     }
 
     // Update is called once per frame
@@ -37,6 +38,15 @@ public class EnemyStateDriver : MonoBehaviour, IHitAble
         ctx.currentLeaf = machine.Root.Leaf();
         var path = StatePath(ctx.currentLeaf);
         ctx.debugCurrentLeaf = path;
+    }
+    private void FixedUpdate()
+    {
+        if (ctx.shouldApplyForce)
+        {
+            ctx.rb.AddForce(ctx.hitForce,ForceMode.Impulse);
+            ctx.shouldApplyForce = false;
+            ctx.hitForce = Vector3.zero;
+        }
     }
 
     public void OnZoneTriggered(bool context)
@@ -63,50 +73,26 @@ public class EnemyStateDriver : MonoBehaviour, IHitAble
         // hit from is where the player is, force is how much force will be applided and damage is damage.
         Vector3 hitDir = (transform.position - hitFrom).normalized;
         hitDir.y = 0;
+        hitDir = hitDir*force;
+        hitDir.y = verticalForce;
+
+        ctx.hitForce = hitDir;
+        
         ctx.isHit = true;
-        StartCoroutine(KnockbackRoutine(hitDir,force,verticalForce,1));
+
+        // Cancel any previous instance running on this context before starting a new one
+        if (ctx._cts != null)
+        {
+            ctx._cts.Cancel();
+        }
+        //StartCoroutine(KnockbackRoutine(hitDir,force,verticalForce,1));
     }
 
-    private IEnumerator KnockbackRoutine(Vector3 direction, float distance, float arcHeight, float duration)
+    private void OnDestroy()
     {
-        // 1. Disable the NavMeshAgent so physics/math can take over
-        if (ctx.Agent != null && ctx.Agent.enabled)
-        {
-            ctx.Agent.enabled = false;
-        }
-
-        Vector3 startPos = transform.position;
-        Vector3 targetPos = startPos + (direction.normalized * distance);
-        float elapsed = 0f;
-
-        // Ensure target is valid or clamped if needed, or just move freely in air
-        while (elapsed < duration)
-        {
-            float t = elapsed / duration;
-
-            // Linear interpolation for horizontal movement
-            Vector3 currentPos = Vector3.Lerp(startPos, targetPos, t);
-
-            // Parabolic arc offset using a sine wave or parabola formula (4 * h * t * (1 - t))
-            float heightOffset = 4f * arcHeight * t * (1f - t);
-            currentPos.y += heightOffset;
-
-            transform.position = currentPos;
-
-            elapsed += Time.deltaTime;
-            yield return null;
-        }
-
-        transform.position = targetPos;
-        ctx.isHit=false;
-        // 2. Re-enable the NavMeshAgent and warp to the landed position
-        if (ctx.Agent != null)
-        {
-            ctx.Agent.enabled = true;
-            // Warp ensures the agent locks back onto the nearest point on the NavMesh
-            ctx.Agent.Warp(transform.position);
-        }
-        
+        // Always clean up and trigger cancellation when the object is destroyed
+        ctx._cts?.Cancel();
+        ctx._cts?.Dispose();
     }
 }
 
@@ -130,6 +116,10 @@ public class EnemyContext
     [Header("Hit")]
     public float stunTime;
     public float verticalVelocity;
+    public Vector3 hitForce;
+    public float MaxKnockbackTime;
+    public float StillThreshold = 0.05f;
+    public bool shouldApplyForce = false;
 
     [Header("Bools")]
     public bool inZone;
@@ -139,9 +129,11 @@ public class EnemyContext
 
     // refrences;
     public NavMeshAgent Agent;
+    public Rigidbody rb;
     public State currentLeaf;
     public Transform WanderZone;
     public GameObject Target;
+    public CancellationTokenSource _cts;
 
 
     public bool IsGrounded()
@@ -155,5 +147,17 @@ public class EnemyContext
             return Mathf.Abs(Agent.gameObject.transform.position.y - hit.position.y) < 0.1f;
         }
         return false;
+    }
+
+    public static async Awaitable WaitUntilAsync(Func<bool> condition, CancellationToken cancellationToken)
+    {
+        while (!condition())
+        {
+            // Safely exit if the target object is destroyed or operation is canceled
+            cancellationToken.ThrowIfCancellationRequested(); 
+            
+            // Wait for the next frame before checking the condition again
+            await Awaitable.NextFrameAsync(cancellationToken); 
+        }
     }
 }

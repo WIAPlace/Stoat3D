@@ -41,13 +41,15 @@ public class BasicAttack : State
         if(!attacked && timer >= ctx.attackTime)
         {
             attacked = true;
+            Vector3 bodyPos = ctx.visualBody.transform.position;
             
             Collider[] hitTargets = Physics.OverlapSphere(ctx.attackPoint.position,ctx.atkRange,ctx.attackLayer);
 
             foreach(Collider target in hitTargets)
             {
-                if(target.gameObject.TryGetComponent<IHitAble>(out IHitAble hitAble)) 
-                    hitAble.OnHit(ctx.visualBody.transform.position, ctx.atkForce,ctx.vertAtkForce,ctx.atkdamage);
+                if(target.gameObject.TryGetComponent<IHitAble>(out IHitAble hitAble)) {
+                    hitAble.OnHit(bodyPos, ctx.atkForce,ctx.vertAtkForce,ctx.atkdamage);
+                }
                 
             }
         }       
