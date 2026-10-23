@@ -105,20 +105,12 @@ namespace HSM {
             gravVel = ctx.velocity.y; // maintain gravity
             Vector3 horizontalVel;
 
-            if(!ctx.walled && !ctx.ledgeGrabbed && ctx.grounded){ // grounded
-                // Move in the direction of the controller.
-                horizontalVel = (body.transform.right * ctx.velocity.x) + (body.transform.forward * ctx.velocity.z);
-                horizontalVel = AdjustVelocityToSlope(horizontalVel);
-            }
-            else if(ctx.useInitialForward) // jumping / airborn
-            {
+            if(ctx.velMove) horizontalVel = ctx.velocity;
+            else{
                 horizontalVel = (ctx.rightDir*ctx.velocity.x)+(ctx.forwardDir*ctx.velocity.z);
+                if(ctx.grounded)horizontalVel = AdjustVelocityToSlope(horizontalVel);
             }
-            else // wall and ledge*
-            {
-                //horizontalVel = (body.transform.right * ctx.velocity.x) + (body.transform.forward * ctx.velocity.z);
-                horizontalVel = ctx.velocity;
-            }
+            
             Vector3 gravVector = new Vector3(0,gravVel,0);
             //Vector3 tempVel = new Vector3(horizontalVel.x,gravVel,horizontalVel.z);
             Vector3 tempVel = horizontalVel + gravVector;
@@ -535,6 +527,7 @@ namespace HSM {
         public bool jumpPressed;
         public bool simpleJump; // used for if the basic jump can be used in grounded state
         public bool useInitialForward;
+        public bool velMove;
         public bool grounded;
         public bool walled;
         public bool ledgeGrabbed;

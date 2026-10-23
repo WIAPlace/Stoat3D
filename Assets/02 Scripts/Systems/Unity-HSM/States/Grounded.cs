@@ -45,6 +45,9 @@ namespace HSM {
         // On Update Occurs from the bottom of the tree to the top
         protected override void OnUpdate(float deltaTime)
         {
+            ctx.rightDir = ctx.body.transform.right;
+            ctx.forwardDir = ctx.body.transform.forward;
+            
             if(ctx.grounded && ctx.velocity.y < 0) // if on ground reset gravity
             {
                 ctx.velocity.y = 0;

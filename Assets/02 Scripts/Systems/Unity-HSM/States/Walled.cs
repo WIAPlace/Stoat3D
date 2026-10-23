@@ -31,15 +31,18 @@ public class Walled : State
     
     protected override void OnEnter()
     {
-        
+        ctx.rightDir = Vector3.one;
+        ctx.forwardDir = Vector3.one;
 
         Vector3 targetPosition = ctx.wallHit.point + (ctx.wallHit.normal * ctx.wallSnapLength);
         ctx.externalPush = targetPosition - ctx.body.transform.position;
-        base.OnEnter();
+
+        ctx.velMove=true;
     }
 
     protected override void OnExit()
     {
+        
         // Store your target world-space velocity 
         Vector3 targetWorldVelocity = ctx.velocity;
 
@@ -51,11 +54,13 @@ public class Walled : State
         ctx.velocity = localVelocity;
 
         ctx.walled = false;
+
+        ctx.velMove=false;
     }
     
     protected override void OnUpdate(float deltaTime)
     {
-        
+        //ctx.TurnVisualBodyToMechForward(deltaTime);
     }
     
 }

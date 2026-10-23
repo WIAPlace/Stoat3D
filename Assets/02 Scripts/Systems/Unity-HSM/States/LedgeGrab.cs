@@ -31,11 +31,14 @@ public class LedgeGrab : State {
         //Vector3 directionToLedge = ctx.currLedge.position - ctx.body.transform.position;
         //directionToLedge.y = 0;
         //ctx.body.transform.rotation = Quaternion.LookRotation(directionToLedge.normalized);
-
+        ctx.rightDir = Vector3.one;
+        ctx.forwardDir = Vector3.one;
 
         ctx.lastLedge = ctx.ledgeHit.transform;
 
         ctx.velocity = Vector3.zero;
+
+        ctx.velMove=true;
     }
 
     protected override void OnExit()
@@ -53,6 +56,8 @@ public class LedgeGrab : State {
         ctx.velocity = localVelocity;
 
         ctx.LastLedgeReset();
+        
+        ctx.velMove=false;
     }
 
     protected override void OnUpdate(float deltaTime)

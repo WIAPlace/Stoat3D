@@ -3784,7 +3784,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!65 &1410612408
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -4584,13 +4584,13 @@ MonoBehaviour:
     atkdamage: 2
     atkRange: 3
     atkForce:
-    - 1
-    - 1
-    - 5
+    - 2
+    - 2
+    - 10
     vertAtkForce:
     - 1
     - 1
-    - 4
+    - 5
     chainAmt: 3
     attackTime: 0.1
     coolDown: 0.3
