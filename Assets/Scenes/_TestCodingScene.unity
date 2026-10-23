@@ -4583,8 +4583,14 @@ MonoBehaviour:
     verticalLedgeJumpMod: 1.3
     atkdamage: 2
     atkRange: 3
-    atkForce: 10
-    vertAtkForce: 2
+    atkForce:
+    - 1
+    - 1
+    - 5
+    vertAtkForce:
+    - 1
+    - 1
+    - 4
     chainAmt: 3
     attackTime: 0.1
     coolDown: 0.3
